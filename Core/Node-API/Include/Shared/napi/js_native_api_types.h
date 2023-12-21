@@ -19,6 +19,8 @@ typedef uint16_t char16_t;
 #endif
 #endif
 
+#define NAPI_VERSION 8
+
 // JSVM API types are all opaque pointers for ABI stability
 // typedef undefined structs instead of void* for compile time type safety
 typedef struct napi_env__* napi_env;

@@ -33,6 +33,8 @@ struct uv_loop_s;  // Forward declaration.
 #define NAPI_NO_RETURN
 #endif
 
+#define NAPI_VERSION 8
+
 typedef napi_value(NAPI_CDECL* napi_addon_register_func)(napi_env env,
                                                          napi_value exports);
 typedef int32_t(NAPI_CDECL* node_api_addon_get_api_version_func)(void);
@@ -193,10 +195,12 @@ napi_open_callback_scope(napi_env env,
                          napi_async_context context,
                          napi_callback_scope* result);
 
-NAPI_EXTERN napi_status NAPI_CDECL
-napi_close_callback_scope(napi_env env, napi_callback_scope scope);
+
 
 #endif  // NAPI_VERSION >= 3
+
+NAPI_EXTERN napi_status NAPI_CDECL
+napi_close_callback_scope(napi_env env, napi_callback_scope scope);
 
 #if NAPI_VERSION >= 4
 

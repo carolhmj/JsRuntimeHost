@@ -354,9 +354,15 @@ inline napi_status Unwrap(napi_env env,
   v8::Local<v8::Value> value = v8impl::V8LocalValueFromJsValue(js_object);
   RETURN_STATUS_IF_FALSE(env, value->IsObject(), napi_invalid_arg);
   v8::Local<v8::Object> obj = value.As<v8::Object>();
-
-  auto val = obj->GetPrivate(context, NAPI_PRIVATE_KEY(context))
+  
+  /*auto val = obj->GetPrivate(context, NAPI_PRIVATE_KEY(context))
                  .ToLocalChecked();
+  v8::String::Utf8Value str(env->isolate, val);
+  auto val2 = obj->GetInternalField(0);
+  v8::String::Utf8Value str2(env->isolate, val);*/
+  auto key = v8::String::NewFromUtf8(env->isolate, "_wrapped").ToLocalChecked();
+  auto val = obj->Get(context, key).ToLocalChecked();
+  v8::String::Utf8Value str(env->isolate, val);
   RETURN_STATUS_IF_FALSE(env, val->IsExternal(), napi_invalid_arg);
   Reference* reference =
       static_cast<v8impl::Reference*>(val.As<v8::External>()->Value());
@@ -567,10 +573,10 @@ inline napi_status Wrap(napi_env env,
   v8::Local<v8::Object> obj = value.As<v8::Object>();
 
   // If we've already wrapped this object, we error out.
-  RETURN_STATUS_IF_FALSE(
-      env,
-      !obj->HasPrivate(context, NAPI_PRIVATE_KEY(context)).FromJust(),
-      napi_invalid_arg);
+  //RETURN_STATUS_IF_FALSE(
+  //    env,
+  //    !obj->HasPrivate(context, NAPI_PRIVATE_KEY(context)).FromJust(),
+  //    napi_invalid_arg);
 
   v8impl::Reference* reference = nullptr;
   if (result != nullptr) {
@@ -598,11 +604,12 @@ inline napi_status Wrap(napi_env env,
         native_object,
         finalize_cb == nullptr ? nullptr : finalize_hint);
   }
-
-  CHECK(obj->SetPrivate(context,
+  /*CHECK(obj->SetPrivate(context,
                         NAPI_PRIVATE_KEY(context),
                         v8::External::New(env->isolate, reference))
-            .FromJust());
+            .FromJust());*/
+  auto key = v8::String::NewFromUtf8(env->isolate, "_wrapped").ToLocalChecked();
+  obj->Set(context, key, v8::External::New(env->isolate, reference));
 
   return GET_RETURN_STATUS(env);
 }
