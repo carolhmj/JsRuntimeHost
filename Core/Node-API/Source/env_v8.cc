@@ -7,7 +7,7 @@ namespace Napi
   Env Attach(v8::Local<v8::Context> isolate)
   {
     // second argument is module version
-    return {new napi_env__(isolate, 9)};
+    return {new napi_env__(isolate, 3)};
   }
 
   void Detach(Env env)

@@ -33,7 +33,7 @@ typedef enum {
   napi_default = 0,
   napi_writable = 1 << 0,
   napi_enumerable = 1 << 1,
-  napi_configurable = 1 << 2,
+  napi_configurable = 1 << 2,  
 
   // Used with napi_define_class to distinguish static properties
   // from instance properties. Ignored by napi_define_properties.
@@ -109,10 +109,10 @@ typedef enum {
 //     added value(s).
 
 typedef napi_value(NAPI_CDECL* napi_callback)(napi_env env,
-                                              napi_callback_info info);
+                                    napi_callback_info info);
 typedef void(NAPI_CDECL* napi_finalize)(napi_env env,
-                                        void* finalize_data,
-                                        void* finalize_hint);
+                              void* finalize_data,
+                              void* finalize_hint);
 
 typedef struct {
   // One of utf8name or name should be NULL.

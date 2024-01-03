@@ -38,7 +38,7 @@
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 static_assert(sizeof(char16_t) == sizeof(wchar_t),
               "Size mismatch between char16_t and wchar_t");
-#define NAPI_WIDE_TEXT(x) reinterpret_cast<char16_t*>(L##x)
+#define NAPI_WIDE_TEXT(x) reinterpret_cast<char16_t*>(L ## x)
 #else
 #define NAPI_WIDE_TEXT(x) u##x
 #endif
@@ -142,10 +142,10 @@ static_assert(sizeof(char16_t) == sizeof(wchar_t),
   NAPI_DISALLOW_COPY(CLASS)
 
 #define NAPI_CHECK(condition, location, message)                               \
-  do {                                                                         \
+  do {                                                   \
     if (!(condition)) {                                                        \
-      Napi::Error::Fatal((location), (message));                               \
-    }                                                                          \
+      Napi::Error::Fatal((location), (message));         \
+    }                                                    \
   } while (0)
 
 #define NAPI_FATAL_IF_FAILED(status, location, message)                        \
@@ -172,26 +172,26 @@ using namespace NAPI_CPP_CUSTOM_NAMESPACE;
 namespace NAPI_CPP_CUSTOM_NAMESPACE {
 #endif
 
-// Forward declarations
-class Env;
-class Value;
-class Boolean;
-class Number;
+  // Forward declarations
+  class Env;
+  class Value;
+  class Boolean;
+  class Number;
 #if NAPI_VERSION > 5
-class BigInt;
+  class BigInt;
 #endif  // NAPI_VERSION > 5
 #if (NAPI_VERSION > 4)
 class Date;
 #endif
-class String;
-class Object;
-class Array;
+  class String;
+  class Object;
+  class Array;
 class ArrayBuffer;
-class Function;
-class Error;
-class PropertyDescriptor;
-class CallbackInfo;
-class TypedArray;
+  class Function;
+  class Error;
+  class PropertyDescriptor;
+  class CallbackInfo;
+  class TypedArray;
 template <typename T>
 class TypedArrayOf;
 
@@ -286,19 +286,19 @@ using MaybeOrValue = T;
 #endif
 
 /// Environment for Node-API values and operations.
-///
+  ///
 /// All Node-API values and operations must be associated with an environment.
 /// An environment instance is always provided to callback functions; that
 /// environment must then be used for any creation of Node-API values or other
 /// Node-API operations within the callback. (Many methods infer the
 /// environment from the `this` instance that the method is called on.)
-///
+  ///
 /// In the future, multiple environments per process may be supported,
 /// although current implementations only support one environment per process.
-///
+  ///
 /// In the V8 JavaScript engine, a Node-API environment approximately
 /// corresponds to an Isolate.
-class Env {
+  class Env {
  private:
   napi_env _env;
 #if NAPI_VERSION > 5
@@ -307,8 +307,8 @@ class Env {
   template <typename DataType, typename HintType>
   static void DefaultFiniWithHint(Env, DataType* data, HintType* hint);
 #endif  // NAPI_VERSION > 5
- public:
-  Env(napi_env env);
+  public:
+    Env(napi_env env);
 
   operator napi_env() const;
 
@@ -316,7 +316,7 @@ class Env {
   Value Undefined() const;
   Value Null() const;
 
-  bool IsExceptionPending() const;
+    bool IsExceptionPending() const;
   Error GetAndClearPendingException() const;
 
   MaybeOrValue<Value> RunScript(const char* utf8script) const;
@@ -362,7 +362,7 @@ class Env {
     bool Remove(Env env);
     bool IsEmpty() const;
 
-   private:
+  private:
     static inline void Wrapper(void* data) NAPI_NOEXCEPT;
     static inline void WrapperWithArg(void* data) NAPI_NOEXCEPT;
 
@@ -377,24 +377,24 @@ class Env {
 #if NAPI_VERSION > 8
   const char* GetModuleFileName() const;
 #endif  // NAPI_VERSION > 8
-};
+  };
 
-/// A JavaScript value of unknown type.
-///
+  /// A JavaScript value of unknown type.
+  ///
 /// For type-specific operations, convert to one of the Value subclasses using a
 /// `To*` or `As()` method. The `To*` methods do type coercion; the `As()`
 /// method does not.
-///
-///     Napi::Value value = ...
+  ///
+  ///     Napi::Value value = ...
 ///     if (!value.IsString()) throw Napi::TypeError::New(env, "Invalid
 ///     arg..."); Napi::String str = value.As<Napi::String>(); // Cast to a
 ///     string value
-///
-///     Napi::Value anotherValue = ...
-///     bool isTruthy = anotherValue.ToBoolean(); // Coerce to a boolean value
-class Value {
- public:
-  Value();  ///< Creates a new _empty_ Value instance.
+  ///
+  ///     Napi::Value anotherValue = ...
+  ///     bool isTruthy = anotherValue.ToBoolean(); // Coerce to a boolean value
+  class Value {
+  public:
+    Value();                               ///< Creates a new _empty_ Value instance.
   Value(napi_env env,
         napi_value value);  ///< Wraps a Node-API value primitive.
 
@@ -414,9 +414,9 @@ class Value {
   static Value From(napi_env env, const T& value);
 
   /// Converts to a Node-API value primitive.
-  ///
-  /// If the instance is _empty_, this returns `nullptr`.
-  operator napi_value() const;
+    ///
+    /// If the instance is _empty_, this returns `nullptr`.
+    operator napi_value() const;
 
   /// Tests if this value strictly equals another value.
   bool operator==(const Value& other) const;
@@ -430,47 +430,47 @@ class Value {
   /// Gets the environment the value is associated with.
   Napi::Env Env() const;
 
-  /// Checks if the value is empty (uninitialized).
-  ///
+    /// Checks if the value is empty (uninitialized).
+    ///
   /// An empty value is invalid, and most attempts to perform an operation on an
   /// empty value will result in an exception. Note an empty value is distinct
   /// from JavaScript `null` or `undefined`, which are valid values.
-  ///
+    ///
   /// When C++ exceptions are disabled at compile time, a method with a `Value`
   /// return type may return an empty value to indicate a pending exception. So
   /// when not using C++ exceptions, callers should check whether the value is
   /// empty before attempting to use it.
-  bool IsEmpty() const;
+    bool IsEmpty() const;
 
   napi_valuetype Type() const;  ///< Gets the type of the value.
 
   bool IsUndefined()
       const;            ///< Tests if a value is an undefined JavaScript value.
-  bool IsNull() const;  ///< Tests if a value is a null JavaScript value.
-  bool IsBoolean() const;  ///< Tests if a value is a JavaScript boolean.
-  bool IsNumber() const;   ///< Tests if a value is a JavaScript number.
+    bool IsNull() const;        ///< Tests if a value is a null JavaScript value.
+    bool IsBoolean() const;     ///< Tests if a value is a JavaScript boolean.
+    bool IsNumber() const;      ///< Tests if a value is a JavaScript number.
 #if NAPI_VERSION > 5
-  bool IsBigInt() const;  ///< Tests if a value is a JavaScript bigint.
+    bool IsBigInt() const;      ///< Tests if a value is a JavaScript bigint.
 #endif                    // NAPI_VERSION > 5
 #if (NAPI_VERSION > 4)
   bool IsDate() const;  ///< Tests if a value is a JavaScript date.
 #endif
-  bool IsString() const;  ///< Tests if a value is a JavaScript string.
-  bool IsSymbol() const;  ///< Tests if a value is a JavaScript symbol.
-  bool IsArray() const;   ///< Tests if a value is a JavaScript array.
+    bool IsString() const;      ///< Tests if a value is a JavaScript string.
+    bool IsSymbol() const;      ///< Tests if a value is a JavaScript symbol.
+    bool IsArray() const;       ///< Tests if a value is a JavaScript array.
   bool IsArrayBuffer()
       const;  ///< Tests if a value is a JavaScript array buffer.
-  bool IsTypedArray() const;  ///< Tests if a value is a JavaScript typed array.
-  bool IsObject() const;      ///< Tests if a value is a JavaScript object.
-  bool IsFunction() const;    ///< Tests if a value is a JavaScript function.
-  bool IsPromise() const;     ///< Tests if a value is a JavaScript promise.
-  bool IsDataView() const;    ///< Tests if a value is a JavaScript data view.
-  bool IsBuffer() const;      ///< Tests if a value is a Node buffer.
-  bool IsExternal() const;  ///< Tests if a value is a pointer to external data.
+    bool IsTypedArray() const;  ///< Tests if a value is a JavaScript typed array.
+    bool IsObject() const;      ///< Tests if a value is a JavaScript object.
+    bool IsFunction() const;    ///< Tests if a value is a JavaScript function.
+    bool IsPromise() const;     ///< Tests if a value is a JavaScript promise.
+    bool IsDataView() const;    ///< Tests if a value is a JavaScript data view.
+    bool IsBuffer() const;      ///< Tests if a value is a Node buffer.
+    bool IsExternal() const;    ///< Tests if a value is a pointer to external data.
 
   /// Casts to another type of `Napi::Value`, when the actual type is known or
   /// assumed.
-  ///
+    ///
   /// This conversion does NOT coerce the type. Calling any methods
   /// inappropriate for the actual value type will throw `Napi::Error`.
   ///
@@ -495,14 +495,18 @@ class Value {
   /// !endcond
 };
 
-/// A JavaScript boolean value.
-class Boolean : public Value {
- public:
+  /// A JavaScript boolean value.
+  class Boolean : public Value {
+  public:
   static Boolean New(napi_env env,  ///< Node-API environment
-                     bool value     ///< Boolean value
-  );
+      bool value    ///< Boolean value
+    );
 
   static void CheckCast(napi_env env, napi_value value);
+
+    Boolean();                               ///< Creates a new _empty_ Boolean instance.
+  Boolean(napi_env env,
+          napi_value value);  ///< Wraps a Node-API value primitive.
 
   Boolean();  ///< Creates a new _empty_ Boolean instance.
   Boolean(napi_env env,
@@ -512,16 +516,16 @@ class Boolean : public Value {
   bool Value() const;     ///< Converts a Boolean value to a boolean primitive.
 };
 
-/// A JavaScript number value.
-class Number : public Value {
- public:
+  /// A JavaScript number value.
+  class Number : public Value {
+  public:
   static Number New(napi_env env,  ///< Node-API environment
-                    double value   ///< Number value
-  );
+      double value  ///< Number value
+    );
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Number();  ///< Creates a new _empty_ Number instance.
+    Number();                               ///< Creates a new _empty_ Number instance.
   Number(napi_env env,
          napi_value value);  ///< Wraps a Node-API value primitive.
 
@@ -546,32 +550,32 @@ class Number : public Value {
       const;  ///< Converts a Number value to a 32-bit floating-point value.
   double DoubleValue()
       const;  ///< Converts a Number value to a 64-bit floating-point value.
-};
+  };
 
 #if NAPI_VERSION > 5
-/// A JavaScript bigint value.
-class BigInt : public Value {
- public:
+  /// A JavaScript bigint value.
+  class BigInt : public Value {
+  public:
   static BigInt New(napi_env env,  ///< Node-API environment
-                    int64_t value  ///< Number value
-  );
+      int64_t value ///< Number value
+    );
   static BigInt New(napi_env env,   ///< Node-API environment
-                    uint64_t value  ///< Number value
-  );
+      uint64_t value ///< Number value
+    );
 
-  /// Creates a new BigInt object using a specified sign bit and a
-  /// specified list of digits/words.
-  /// The resulting number is calculated as:
-  /// (-1)^sign_bit * (words[0] * (2^64)^0 + words[1] * (2^64)^1 + ...)
+    /// Creates a new BigInt object using a specified sign bit and a
+    /// specified list of digits/words.
+    /// The resulting number is calculated as:
+    /// (-1)^sign_bit * (words[0] * (2^64)^0 + words[1] * (2^64)^1 + ...)
   static BigInt New(napi_env env,          ///< Node-API environment
-                    int sign_bit,          ///< Sign bit. 1 if negative.
-                    size_t word_count,     ///< Number of words in array
-                    const uint64_t* words  ///< Array of words
-  );
+      int sign_bit,          ///< Sign bit. 1 if negative.
+      size_t word_count,     ///< Number of words in array
+      const uint64_t* words  ///< Array of words
+    );
 
   static void CheckCast(napi_env env, napi_value value);
 
-  BigInt();  ///< Creates a new _empty_ BigInt instance.
+    BigInt();                               ///< Creates a new _empty_ BigInt instance.
   BigInt(napi_env env,
          napi_value value);  ///< Wraps a Node-API value primitive.
 
@@ -583,26 +587,30 @@ class BigInt : public Value {
   size_t WordCount() const;  ///< The number of 64-bit words needed to store
                              ///< the result of ToWords().
 
-  /// Writes the contents of this BigInt to a specified memory location.
+    /// Writes the contents of this BigInt to a specified memory location.
   /// `sign_bit` must be provided and will be set to 1 if this BigInt is
   /// negative.
-  /// `*word_count` has to be initialized to the length of the `words` array.
-  /// Upon return, it will be set to the actual number of words that would
-  /// be needed to store this BigInt (i.e. the return value of `WordCount()`).
-  void ToWords(int* sign_bit, size_t* word_count, uint64_t* words);
-};
+    /// `*word_count` has to be initialized to the length of the `words` array.
+    /// Upon return, it will be set to the actual number of words that would
+    /// be needed to store this BigInt (i.e. the return value of `WordCount()`).
+    void ToWords(int* sign_bit, size_t* word_count, uint64_t* words);
+  };
 #endif  // NAPI_VERSION > 5
 
 #if (NAPI_VERSION > 4)
-/// A JavaScript date value.
-class Date : public Value {
- public:
-  /// Creates a new Date value from a double primitive.
+  /// A JavaScript date value.
+  class Date : public Value {
+  public:
+    /// Creates a new Date value from a double primitive.
   static Date New(napi_env env,  ///< Node-API environment
-                  double value   ///< Number value
-  );
+      double value  ///< Number value
+    );
 
   static void CheckCast(napi_env env, napi_value value);
+
+    Date();                               ///< Creates a new _empty_ Date instance.
+  Date(napi_env env, napi_value value);  ///< Wraps a Node-API value primitive.
+    operator double() const;              ///< Converts a Date value to double primitive
 
   Date();  ///< Creates a new _empty_ Date instance.
   Date(napi_env env, napi_value value);  ///< Wraps a Node-API value primitive.
@@ -612,57 +620,57 @@ class Date : public Value {
 };
 #endif
 
-/// A JavaScript string or symbol value (that can be used as a property name).
-class Name : public Value {
- public:
+  /// A JavaScript string or symbol value (that can be used as a property name).
+  class Name : public Value {
+  public:
   static void CheckCast(napi_env env, napi_value value);
 
-  Name();  ///< Creates a new _empty_ Name instance.
+    Name();                               ///< Creates a new _empty_ Name instance.
   Name(napi_env env,
        napi_value value);  ///< Wraps a Node-API value primitive.
-};
+  };
 
-/// A JavaScript string value.
-class String : public Name {
- public:
-  /// Creates a new String value from a UTF-8 encoded C++ string.
+  /// A JavaScript string value.
+  class String : public Name {
+  public:
+    /// Creates a new String value from a UTF-8 encoded C++ string.
   static String New(napi_env env,             ///< Node-API environment
-                    const std::string& value  ///< UTF-8 encoded C++ string
-  );
+      const std::string& value ///< UTF-8 encoded C++ string
+    );
 
-  /// Creates a new String value from a UTF-16 encoded C++ string.
+    /// Creates a new String value from a UTF-16 encoded C++ string.
   static String New(napi_env env,                ///< Node-API environment
-                    const std::u16string& value  ///< UTF-16 encoded C++ string
-  );
+      const std::u16string& value ///< UTF-16 encoded C++ string
+    );
 
-  /// Creates a new String value from a UTF-8 encoded C string.
-  static String New(
+    /// Creates a new String value from a UTF-8 encoded C string.
+    static String New(
       napi_env env,      ///< Node-API environment
-      const char* value  ///< UTF-8 encoded null-terminated C string
-  );
+      const char* value ///< UTF-8 encoded null-terminated C string
+    );
 
-  /// Creates a new String value from a UTF-16 encoded C string.
-  static String New(
+    /// Creates a new String value from a UTF-16 encoded C string.
+    static String New(
       napi_env env,          ///< Node-API environment
-      const char16_t* value  ///< UTF-16 encoded null-terminated C string
-  );
+      const char16_t* value ///< UTF-16 encoded null-terminated C string
+    );
 
   /// Creates a new String value from a UTF-8 encoded C string with specified
   /// length.
   static String New(napi_env env,       ///< Node-API environment
                     const char* value,  ///< UTF-8 encoded C string (not
                                         ///< necessarily null-terminated)
-                    size_t length       ///< length of the string in bytes
-  );
+      size_t length      ///< length of the string in bytes
+    );
 
   /// Creates a new String value from a UTF-16 encoded C string with specified
   /// length.
-  static String New(
+    static String New(
       napi_env env,           ///< Node-API environment
       const char16_t* value,  ///< UTF-16 encoded C string (not necessarily
                               ///< null-terminated)
-      size_t length           ///< Length of the string in 2-byte code units
-  );
+      size_t length          ///< Length of the string in 2-byte code units
+    );
 
   /// Creates a new String based on the original object's type.
   ///
@@ -688,38 +696,38 @@ class String : public Name {
       const;  ///< Converts a String value to a UTF-8 encoded C++ string.
   std::u16string Utf16Value()
       const;  ///< Converts a String value to a UTF-16 encoded C++ string.
-};
+  };
 
-/// A JavaScript symbol value.
-class Symbol : public Name {
- public:
-  /// Creates a new Symbol value with an optional description.
-  static Symbol New(
+  /// A JavaScript symbol value.
+  class Symbol : public Name {
+  public:
+    /// Creates a new Symbol value with an optional description.
+    static Symbol New(
       napi_env env,  ///< Node-API environment
       const char* description =
           nullptr  ///< Optional UTF-8 encoded null-terminated C string
-                   ///  describing the symbol
-  );
+                                        ///  describing the symbol
+    );
 
-  /// Creates a new Symbol value with a description.
-  static Symbol New(
+    /// Creates a new Symbol value with a description.
+    static Symbol New(
       napi_env env,  ///< Node-API environment
       const std::string&
           description  ///< UTF-8 encoded C++ string describing the symbol
-  );
+    );
 
-  /// Creates a new Symbol value with a description.
+    /// Creates a new Symbol value with a description.
   static Symbol New(napi_env env,       ///< Node-API environment
-                    String description  ///< String value describing the symbol
-  );
+      String description ///< String value describing the symbol
+    );
 
-  /// Creates a new Symbol value with a description.
-  static Symbol New(
+    /// Creates a new Symbol value with a description.
+    static Symbol New(
       napi_env env,           ///< Node-API environment
-      napi_value description  ///< String value describing the symbol
-  );
+      napi_value description ///< String value describing the symbol
+    );
 
-  /// Get a public Symbol (e.g. Symbol.iterator).
+    /// Get a public Symbol (e.g. Symbol.iterator).
   static MaybeOrValue<Symbol> WellKnown(napi_env, const std::string& name);
 
   // Create a symbol in the global registry, UTF-8 Encoded cpp string
@@ -736,7 +744,7 @@ class Symbol : public Name {
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Symbol();  ///< Creates a new _empty_ Symbol instance.
+    Symbol();                               ///< Creates a new _empty_ Symbol instance.
   Symbol(napi_env env,
          napi_value value);  ///< Wraps a Node-API value primitive.
 };
@@ -750,30 +758,30 @@ class TypeTaggable : public Value {
  protected:
   TypeTaggable();
   TypeTaggable(napi_env env, napi_value value);
-};
+  };
 
-/// A JavaScript object value.
+  /// A JavaScript object value.
 class Object : public TypeTaggable {
- public:
-  /// Enables property and element assignments using indexing syntax.
-  ///
+  public:
+    /// Enables property and element assignments using indexing syntax.
+    ///
   /// This is a convenient helper to get and set object properties. As
   /// getting and setting object properties may throw with JavaScript
   /// exceptions, it is notable that these operations may fail.
   /// When NODE_ADDON_API_ENABLE_MAYBE is defined, the process will abort
   /// on JavaScript exceptions.
   ///
-  /// Example:
-  ///
-  ///     Napi::Value propertyValue = object1['A'];
-  ///     object2['A'] = propertyValue;
-  ///     Napi::Value elementValue = array[0];
-  ///     array[1] = elementValue;
-  template <typename Key>
-  class PropertyLValue {
-   public:
-    /// Converts an L-value to a value.
-    operator Value() const;
+    /// Example:
+    ///
+    ///     Napi::Value propertyValue = object1['A'];
+    ///     object2['A'] = propertyValue;
+    ///     Napi::Value elementValue = array[0];
+    ///     array[1] = elementValue;
+    template <typename Key>
+    class PropertyLValue {
+    public:
+      /// Converts an L-value to a value.
+      operator Value() const;
 
     /// Assigns a value to the property. The type of value can be
     /// anything supported by `Object::Set`.
@@ -790,11 +798,15 @@ class Object : public TypeTaggable {
     friend class Napi::Object;
   };
 
-  /// Creates a new Object value.
+    /// Creates a new Object value.
   static Object New(napi_env env  ///< Node-API environment
-  );
+    );
 
   static void CheckCast(napi_env env, napi_value value);
+
+    Object();                               ///< Creates a new _empty_ Object instance.
+  Object(napi_env env,
+         napi_value value);  ///< Wraps a Node-API value primitive.
 
   Object();  ///< Creates a new _empty_ Object instance.
   Object(napi_env env,
@@ -819,132 +831,132 @@ class Object : public TypeTaggable {
   PropertyLValue<Value> operator[](Value index  /// Property / element index
   ) const;
 
-  /// Gets a named property.
+    /// Gets a named property.
   MaybeOrValue<Value> operator[](
-      const char* utf8name  ///< UTF-8 encoded null-terminated property name
-  ) const;
+      const char* utf8name ///< UTF-8 encoded null-terminated property name
+    ) const;
 
-  /// Gets a named property.
+    /// Gets a named property.
   MaybeOrValue<Value> operator[](
-      const std::string& utf8name  ///< UTF-8 encoded property name
-  ) const;
+      const std::string& utf8name ///< UTF-8 encoded property name
+    ) const;
 
-  /// Gets an indexed property or array element.
+    /// Gets an indexed property or array element.
   MaybeOrValue<Value> operator[](uint32_t index  ///< Property / element index
-  ) const;
+    ) const;
 
-  /// Checks whether a property is present.
+    /// Checks whether a property is present.
   MaybeOrValue<bool> Has(napi_value key  ///< Property key primitive
-  ) const;
+    ) const;
 
-  /// Checks whether a property is present.
+    /// Checks whether a property is present.
   MaybeOrValue<bool> Has(Value key  ///< Property key
-  ) const;
+    ) const;
 
-  /// Checks whether a named property is present.
+    /// Checks whether a named property is present.
   MaybeOrValue<bool> Has(
-      const char* utf8name  ///< UTF-8 encoded null-terminated property name
-  ) const;
+      const char* utf8name ///< UTF-8 encoded null-terminated property name
+    ) const;
 
-  /// Checks whether a named property is present.
+    /// Checks whether a named property is present.
   MaybeOrValue<bool> Has(
-      const std::string& utf8name  ///< UTF-8 encoded property name
-  ) const;
+      const std::string& utf8name ///< UTF-8 encoded property name
+    ) const;
 
-  /// Checks whether a own property is present.
+    /// Checks whether a own property is present.
   MaybeOrValue<bool> HasOwnProperty(napi_value key  ///< Property key primitive
-  ) const;
+    ) const;
 
-  /// Checks whether a own property is present.
+    /// Checks whether a own property is present.
   MaybeOrValue<bool> HasOwnProperty(Value key  ///< Property key
-  ) const;
+    ) const;
 
-  /// Checks whether a own property is present.
+    /// Checks whether a own property is present.
   MaybeOrValue<bool> HasOwnProperty(
-      const char* utf8name  ///< UTF-8 encoded null-terminated property name
-  ) const;
+      const char* utf8name ///< UTF-8 encoded null-terminated property name
+    ) const;
 
-  /// Checks whether a own property is present.
+    /// Checks whether a own property is present.
   MaybeOrValue<bool> HasOwnProperty(
-      const std::string& utf8name  ///< UTF-8 encoded property name
-  ) const;
+      const std::string& utf8name ///< UTF-8 encoded property name
+    ) const;
 
-  /// Gets a property.
+    /// Gets a property.
   MaybeOrValue<Value> Get(napi_value key  ///< Property key primitive
-  ) const;
+    ) const;
 
-  /// Gets a property.
+    /// Gets a property.
   MaybeOrValue<Value> Get(Value key  ///< Property key
-  ) const;
+    ) const;
 
-  /// Gets a named property.
+    /// Gets a named property.
   MaybeOrValue<Value> Get(
-      const char* utf8name  ///< UTF-8 encoded null-terminated property name
-  ) const;
+      const char* utf8name ///< UTF-8 encoded null-terminated property name
+    ) const;
 
-  /// Gets a named property.
+    /// Gets a named property.
   MaybeOrValue<Value> Get(
-      const std::string& utf8name  ///< UTF-8 encoded property name
-  ) const;
+      const std::string& utf8name ///< UTF-8 encoded property name
+    ) const;
 
-  /// Sets a property.
-  template <typename ValueType>
+    /// Sets a property.
+    template <typename ValueType>
   MaybeOrValue<bool> Set(napi_value key,         ///< Property key primitive
-                         const ValueType& value  ///< Property value primitive
+      const ValueType& value ///< Property value primitive
   ) const;
 
-  /// Sets a property.
-  template <typename ValueType>
+    /// Sets a property.
+    template <typename ValueType>
   MaybeOrValue<bool> Set(Value key,              ///< Property key
-                         const ValueType& value  ///< Property value
+      const ValueType& value ///< Property value
   ) const;
 
-  /// Sets a named property.
-  template <typename ValueType>
+    /// Sets a named property.
+    template <typename ValueType>
   MaybeOrValue<bool> Set(
-      const char* utf8name,  ///< UTF-8 encoded null-terminated property name
+      const char* utf8name, ///< UTF-8 encoded null-terminated property name
       const ValueType& value) const;
 
-  /// Sets a named property.
-  template <typename ValueType>
+    /// Sets a named property.
+    template <typename ValueType>
   MaybeOrValue<bool> Set(
-      const std::string& utf8name,  ///< UTF-8 encoded property name
-      const ValueType& value        ///< Property value primitive
+      const std::string& utf8name, ///< UTF-8 encoded property name
+      const ValueType& value             ///< Property value primitive
   ) const;
 
-  /// Delete property.
+    /// Delete property.
   MaybeOrValue<bool> Delete(napi_value key  ///< Property key primitive
   ) const;
 
-  /// Delete property.
+    /// Delete property.
   MaybeOrValue<bool> Delete(Value key  ///< Property key
   ) const;
 
-  /// Delete property.
+    /// Delete property.
   MaybeOrValue<bool> Delete(
-      const char* utf8name  ///< UTF-8 encoded null-terminated property name
+      const char* utf8name ///< UTF-8 encoded null-terminated property name
   ) const;
 
-  /// Delete property.
+    /// Delete property.
   MaybeOrValue<bool> Delete(
-      const std::string& utf8name  ///< UTF-8 encoded property name
+      const std::string& utf8name ///< UTF-8 encoded property name
   ) const;
 
-  /// Checks whether an indexed property is present.
+    /// Checks whether an indexed property is present.
   MaybeOrValue<bool> Has(uint32_t index  ///< Property / element index
-  ) const;
+    ) const;
 
-  /// Gets an indexed property or array element.
+    /// Gets an indexed property or array element.
   MaybeOrValue<Value> Get(uint32_t index  ///< Property / element index
-  ) const;
+    ) const;
 
-  /// Sets an indexed property or array element.
-  template <typename ValueType>
+    /// Sets an indexed property or array element.
+    template <typename ValueType>
   MaybeOrValue<bool> Set(uint32_t index,         ///< Property / element index
-                         const ValueType& value  ///< Property value primitive
+      const ValueType& value ///< Property value primitive
   ) const;
 
-  /// Deletes an indexed property or array element.
+    /// Deletes an indexed property or array element.
   MaybeOrValue<bool> Delete(uint32_t index  ///< Property / element index
   ) const;
 
@@ -956,7 +968,7 @@ class Object : public TypeTaggable {
   /// https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-getownproperty-p
   MaybeOrValue<Array> GetPropertyNames() const;  ///< Get all property names
 
-  /// Defines a property on the object.
+    /// Defines a property on the object.
   ///
   /// This operation can fail in case of Proxy.[[DefineOwnProperty]] calling
   /// into JavaScript. See
@@ -966,37 +978,37 @@ class Object : public TypeTaggable {
           property  ///< Descriptor for the property to be defined
   ) const;
 
-  /// Defines properties on the object.
+    /// Defines properties on the object.
   ///
   /// This operation can fail in case of Proxy.[[DefineOwnProperty]] calling
   /// into JavaScript. See
   /// https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-defineownproperty-p-desc
   MaybeOrValue<bool> DefineProperties(
       const std::initializer_list<PropertyDescriptor>& properties
-      ///< List of descriptors for the properties to be defined
+        ///< List of descriptors for the properties to be defined
   ) const;
 
-  /// Defines properties on the object.
+    /// Defines properties on the object.
   ///
   /// This operation can fail in case of Proxy.[[DefineOwnProperty]] calling
   /// into JavaScript. See
   /// https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-defineownproperty-p-desc
   MaybeOrValue<bool> DefineProperties(
       const std::vector<PropertyDescriptor>& properties
-      ///< Vector of descriptors for the properties to be defined
+        ///< Vector of descriptors for the properties to be defined
   ) const;
 
-  /// Checks if an object is an instance created by a constructor function.
-  ///
-  /// This is equivalent to the JavaScript `instanceof` operator.
+    /// Checks if an object is an instance created by a constructor function.
+    ///
+    /// This is equivalent to the JavaScript `instanceof` operator.
   ///
   /// This operation can fail in case of Proxy.[[GetPrototypeOf]] calling into
   /// JavaScript.
   /// See
   /// https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-getprototypeof
   MaybeOrValue<bool> InstanceOf(
-      const Function& constructor  ///< Constructor function
-  ) const;
+      const Function& constructor ///< Constructor function
+    ) const;
 
   template <typename Finalizer, typename T>
   inline void AddFinalizer(Finalizer finalizeCallback, T* data) const;
@@ -1032,27 +1044,27 @@ class Object : public TypeTaggable {
   /// https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-getprototypeof
   MaybeOrValue<bool> Seal() const;
 #endif  // NAPI_VERSION >= 8
-};
+  };
 
-template <typename T>
+  template <typename T>
 class External : public TypeTaggable {
- public:
-  static External New(napi_env env, T* data);
+  public:
+    static External New(napi_env env, T* data);
 
-  // Finalizer must implement `void operator()(Env env, T* data)`.
-  template <typename Finalizer>
+    // Finalizer must implement `void operator()(Env env, T* data)`.
+    template <typename Finalizer>
   static External New(napi_env env, T* data, Finalizer finalizeCallback);
-  // Finalizer must implement `void operator()(Env env, T* data, Hint* hint)`.
-  template <typename Finalizer, typename Hint>
-  static External New(napi_env env,
-                      T* data,
-                      Finalizer finalizeCallback,
-                      Hint* finalizeHint);
+    // Finalizer must implement `void operator()(Env env, T* data, Hint* hint)`.
+    template <typename Finalizer, typename Hint>
+    static External New(napi_env env,
+                        T* data,
+                        Finalizer finalizeCallback,
+                        Hint* finalizeHint);
 
   static void CheckCast(napi_env env, napi_value value);
 
-  External();
-  External(napi_env env, napi_value value);
+    External();
+    External(napi_env env, napi_value value);
 
   T* Data() const;
 };
@@ -1064,8 +1076,8 @@ class Array : public Object {
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Array();
-  Array(napi_env env, napi_value value);
+    Array();
+    Array(napi_env env, napi_value value);
 
   uint32_t Length() const;
 };
@@ -1119,60 +1131,60 @@ class Object::iterator {
 };
 #endif  // NAPI_CPP_EXCEPTIONS
 
-/// A JavaScript array buffer value.
-class ArrayBuffer : public Object {
- public:
+  /// A JavaScript array buffer value.
+  class ArrayBuffer : public Object {
+  public:
   /// Creates a new ArrayBuffer instance over a new automatically-allocated
   /// buffer.
-  static ArrayBuffer New(
+    static ArrayBuffer New(
       napi_env env,      ///< Node-API environment
-      size_t byteLength  ///< Length of the buffer to be allocated, in bytes
-  );
+      size_t byteLength ///< Length of the buffer to be allocated, in bytes
+    );
 
 #ifndef NODE_API_NO_EXTERNAL_BUFFERS_ALLOWED
   /// Creates a new ArrayBuffer instance, using an external buffer with
   /// specified byte length.
-  static ArrayBuffer New(
+    static ArrayBuffer New(
       napi_env env,        ///< Node-API environment
       void* externalData,  ///< Pointer to the external buffer to be used by
                            ///< the array
       size_t byteLength    ///< Length of the external buffer to be used by the
                            ///< array, in bytes
-  );
+    );
 
   /// Creates a new ArrayBuffer instance, using an external buffer with
   /// specified byte length.
-  template <typename Finalizer>
-  static ArrayBuffer New(
+    template <typename Finalizer>
+    static ArrayBuffer New(
       napi_env env,        ///< Node-API environment
       void* externalData,  ///< Pointer to the external buffer to be used by
                            ///< the array
       size_t byteLength,   ///< Length of the external buffer to be used by the
                            ///< array,
-                           ///  in bytes
+                                 ///  in bytes
       Finalizer finalizeCallback  ///< Function to be called when the array
                                   ///< buffer is destroyed;
                                   ///  must implement `void operator()(Env env,
                                   ///  void* externalData)`
-  );
+    );
 
   /// Creates a new ArrayBuffer instance, using an external buffer with
   /// specified byte length.
-  template <typename Finalizer, typename Hint>
-  static ArrayBuffer New(
+    template <typename Finalizer, typename Hint>
+    static ArrayBuffer New(
       napi_env env,        ///< Node-API environment
       void* externalData,  ///< Pointer to the external buffer to be used by
                            ///< the array
       size_t byteLength,   ///< Length of the external buffer to be used by the
                            ///< array,
-                           ///  in bytes
+                                  ///  in bytes
       Finalizer finalizeCallback,  ///< Function to be called when the array
                                    ///< buffer is destroyed;
                                    ///  must implement `void operator()(Env
                                    ///  env, void* externalData, Hint* hint)`
       Hint* finalizeHint  ///< Hint (second parameter) to be passed to the
                           ///< finalize callback
-  );
+    );
 #endif  // NODE_API_NO_EXTERNAL_BUFFERS_ALLOWED
 
   static void CheckCast(napi_env env, napi_value value);
@@ -1188,28 +1200,35 @@ class ArrayBuffer : public Object {
   bool IsDetached() const;
   void Detach();
 #endif  // NAPI_VERSION >= 7
-};
+  };
 
-/// A JavaScript typed-array value with unknown array type.
-///
+  /// A JavaScript typed-array value with unknown array type.
+  ///
 /// For type-specific operations, cast to a `TypedArrayOf<T>` instance using the
 /// `As()` method:
-///
-///     Napi::TypedArray array = ...
-///     if (t.TypedArrayType() == napi_int32_array) {
-///         Napi::Int32Array int32Array = t.As<Napi::Int32Array>();
-///     }
-class TypedArray : public Object {
- public:
+  ///
+  ///     Napi::TypedArray array = ...
+  ///     if (t.TypedArrayType() == napi_int32_array) {
+  ///         Napi::Int32Array int32Array = t.As<Napi::Int32Array>();
+  ///     }
+  class TypedArray : public Object {
+  public:
   static void CheckCast(napi_env env, napi_value value);
 
-  TypedArray();  ///< Creates a new _empty_ TypedArray instance.
+    TypedArray();                               ///< Creates a new _empty_ TypedArray instance.
   TypedArray(napi_env env,
              napi_value value);  ///< Wraps a Node-API value primitive.
 
   napi_typedarray_type TypedArrayType()
       const;  ///< Gets the type of this typed-array.
-  Napi::ArrayBuffer ArrayBuffer() const;  ///< Gets the backing array buffer.
+    Napi::ArrayBuffer ArrayBuffer() const;       ///< Gets the backing array buffer.
+
+  uint8_t ElementSize()
+      const;  ///< Gets the size in bytes of one element in the array.
+    size_t ElementLength() const; ///< Gets the number of elements in the array.
+  size_t ByteOffset()
+      const;  ///< Gets the offset into the buffer where the array starts.
+    size_t ByteLength() const;    ///< Gets the length of the array in bytes.
 
   uint8_t ElementSize()
       const;  ///< Gets the size in bytes of one element in the array.
@@ -1228,45 +1247,45 @@ class TypedArray : public Object {
              napi_typedarray_type type,
              size_t length);
 
-  template <typename T>
-  static
+    template <typename T>
+    static
 #if defined(NAPI_HAS_CONSTEXPR)
       constexpr
 #endif
       napi_typedarray_type
       TypedArrayTypeForPrimitiveType() {
-    return std::is_same<T, int8_t>::value     ? napi_int8_array
-           : std::is_same<T, uint8_t>::value  ? napi_uint8_array
-           : std::is_same<T, int16_t>::value  ? napi_int16_array
-           : std::is_same<T, uint16_t>::value ? napi_uint16_array
-           : std::is_same<T, int32_t>::value  ? napi_int32_array
-           : std::is_same<T, uint32_t>::value ? napi_uint32_array
-           : std::is_same<T, float>::value    ? napi_float32_array
-           : std::is_same<T, double>::value   ? napi_float64_array
+      return std::is_same<T, int8_t>::value ? napi_int8_array
+        : std::is_same<T, uint8_t>::value ? napi_uint8_array
+        : std::is_same<T, int16_t>::value ? napi_int16_array
+        : std::is_same<T, uint16_t>::value ? napi_uint16_array
+        : std::is_same<T, int32_t>::value ? napi_int32_array
+        : std::is_same<T, uint32_t>::value ? napi_uint32_array
+        : std::is_same<T, float>::value ? napi_float32_array
+        : std::is_same<T, double>::value ? napi_float64_array
 #if NAPI_VERSION > 5
-           : std::is_same<T, int64_t>::value  ? napi_bigint64_array
-           : std::is_same<T, uint64_t>::value ? napi_biguint64_array
+        : std::is_same<T, int64_t>::value ? napi_bigint64_array
+        : std::is_same<T, uint64_t>::value ? napi_biguint64_array
 #endif  // NAPI_VERSION > 5
                                               : napi_int8_array;
-  }
-  /// !endcond
-};
+    }
+    /// !endcond
+  };
 
-/// A JavaScript typed-array value with known array type.
-///
+  /// A JavaScript typed-array value with known array type.
+  ///
 /// Note while it is possible to create and access Uint8 "clamped" arrays using
 /// this class, the _clamping_ behavior is only applied in JavaScript.
-template <typename T>
-class TypedArrayOf : public TypedArray {
- public:
+  template <typename T>
+  class TypedArrayOf : public TypedArray {
+  public:
   /// Creates a new TypedArray instance over a new automatically-allocated array
   /// buffer.
-  ///
+    ///
   /// The array type parameter can normally be omitted (because it is inferred
   /// from the template parameter T), except when creating a "clamped" array:
-  ///
-  ///     Uint8Array::New(env, length, napi_uint8_clamped_array)
-  static TypedArrayOf New(
+    ///
+    ///     Uint8Array::New(env, length, napi_uint8_clamped_array)
+    static TypedArrayOf New(
       napi_env env,          ///< Node-API environment
       size_t elementLength,  ///< Length of the created array, as a number of
                              ///< elements
@@ -1278,19 +1297,19 @@ class TypedArrayOf : public TypedArray {
 #endif
       ///< Type of array, if different from the default array type for the
       ///< template parameter T.
-  );
+    );
 
-  /// Creates a new TypedArray instance over a provided array buffer.
-  ///
+    /// Creates a new TypedArray instance over a provided array buffer.
+    ///
   /// The array type parameter can normally be omitted (because it is inferred
   /// from the template parameter T), except when creating a "clamped" array:
-  ///
-  ///     Uint8Array::New(env, length, buffer, 0, napi_uint8_clamped_array)
-  static TypedArrayOf New(
+    ///
+    ///     Uint8Array::New(env, length, buffer, 0, napi_uint8_clamped_array)
+    static TypedArrayOf New(
       napi_env env,          ///< Node-API environment
       size_t elementLength,  ///< Length of the created array, as a number of
                              ///< elements
-      Napi::ArrayBuffer arrayBuffer,  ///< Backing array buffer instance to use
+      Napi::ArrayBuffer arrayBuffer, ///< Backing array buffer instance to use
       size_t bufferOffset,  ///< Offset into the array buffer where the
                             ///< typed-array starts
 #if defined(NAPI_HAS_CONSTEXPR)
@@ -1301,30 +1320,31 @@ class TypedArrayOf : public TypedArray {
 #endif
       ///< Type of array, if different from the default array type for the
       ///< template parameter T.
-  );
+    );
 
   static void CheckCast(napi_env env, napi_value value);
+
+    TypedArrayOf();                               ///< Creates a new _empty_ TypedArrayOf instance.
+  TypedArrayOf(napi_env env,
+               napi_value value);  ///< Wraps a Node-API value primitive.
 
   TypedArrayOf();  ///< Creates a new _empty_ TypedArrayOf instance.
   TypedArrayOf(napi_env env,
                napi_value value);  ///< Wraps a Node-API value primitive.
 
-  T& operator[](size_t index);  ///< Gets or sets an element in the array.
-  const T& operator[](size_t index) const;  ///< Gets an element in the array.
-
-  /// Gets a pointer to the array's backing buffer.
-  ///
+    /// Gets a pointer to the array's backing buffer.
+    ///
   /// This is not necessarily the same as the `ArrayBuffer::Data()` pointer,
   /// because the typed-array may have a non-zero `ByteOffset()` into the
   /// `ArrayBuffer`.
-  T* Data();
+    T* Data();
 
-  /// Gets a pointer to the array's backing buffer.
-  ///
+    /// Gets a pointer to the array's backing buffer.
+    ///
   /// This is not necessarily the same as the `ArrayBuffer::Data()` pointer,
   /// because the typed-array may have a non-zero `ByteOffset()` into the
   /// `ArrayBuffer`.
-  const T* Data() const;
+    const T* Data() const;
 
  private:
   T* _data;
@@ -1336,24 +1356,29 @@ class TypedArrayOf : public TypedArray {
                T* data);
 };
 
-/// The DataView provides a low-level interface for reading/writing multiple
-/// number types in an ArrayBuffer irrespective of the platform's endianness.
-class DataView : public Object {
- public:
+  /// The DataView provides a low-level interface for reading/writing multiple
+  /// number types in an ArrayBuffer irrespective of the platform's endianness.
+  class DataView : public Object {
+  public:
   static DataView New(napi_env env, Napi::ArrayBuffer arrayBuffer);
-  static DataView New(napi_env env,
-                      Napi::ArrayBuffer arrayBuffer,
-                      size_t byteOffset);
-  static DataView New(napi_env env,
-                      Napi::ArrayBuffer arrayBuffer,
-                      size_t byteOffset,
-                      size_t byteLength);
+    static DataView New(napi_env env,
+                        Napi::ArrayBuffer arrayBuffer,
+                        size_t byteOffset);
+    static DataView New(napi_env env,
+                        Napi::ArrayBuffer arrayBuffer,
+                        size_t byteOffset,
+                        size_t byteLength);
 
   static void CheckCast(napi_env env, napi_value value);
 
-  DataView();  ///< Creates a new _empty_ DataView instance.
+    DataView();                               ///< Creates a new _empty_ DataView instance.
   DataView(napi_env env,
            napi_value value);  ///< Wraps a Node-API value primitive.
+
+    Napi::ArrayBuffer ArrayBuffer() const;    ///< Gets the backing array buffer.
+  size_t ByteOffset()
+      const;  ///< Gets the offset into the buffer where the array starts.
+    size_t ByteLength() const;    ///< Gets the length of the array in bytes.
 
   Napi::ArrayBuffer ArrayBuffer() const;  ///< Gets the backing array buffer.
   size_t ByteOffset()
@@ -1391,8 +1416,8 @@ class DataView : public Object {
   size_t _length;
 };
 
-class Function : public Object {
- public:
+  class Function : public Object {
+  public:
   using VoidCallback = void (*)(const CallbackInfo& info);
   using Callback = Value (*)(const CallbackInfo& info);
 
@@ -1416,25 +1441,25 @@ class Function : public Object {
                       const std::string& utf8name,
                       void* data = nullptr);
 
-  /// Callable must implement operator() accepting a const CallbackInfo&
-  /// and return either void or Value.
-  template <typename Callable>
-  static Function New(napi_env env,
-                      Callable cb,
-                      const char* utf8name = nullptr,
-                      void* data = nullptr);
-  /// Callable must implement operator() accepting a const CallbackInfo&
-  /// and return either void or Value.
-  template <typename Callable>
-  static Function New(napi_env env,
-                      Callable cb,
-                      const std::string& utf8name,
-                      void* data = nullptr);
+    /// Callable must implement operator() accepting a const CallbackInfo&
+    /// and return either void or Value.
+    template <typename Callable>
+    static Function New(napi_env env,
+                        Callable cb,
+                        const char* utf8name = nullptr,
+                        void* data = nullptr);
+    /// Callable must implement operator() accepting a const CallbackInfo&
+    /// and return either void or Value.
+    template <typename Callable>
+    static Function New(napi_env env,
+                        Callable cb,
+                        const std::string& utf8name,
+                        void* data = nullptr);
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Function();
-  Function(napi_env env, napi_value value);
+    Function();
+    Function(napi_env env, napi_value value);
 
   MaybeOrValue<Value> operator()(
       const std::initializer_list<napi_value>& args) const;
@@ -1455,20 +1480,20 @@ class Function : public Object {
 
   MaybeOrValue<Value> MakeCallback(
       napi_value recv,
-      const std::initializer_list<napi_value>& args,
-      napi_async_context context = nullptr) const;
+                       const std::initializer_list<napi_value>& args,
+                       napi_async_context context = nullptr) const;
   MaybeOrValue<Value> MakeCallback(napi_value recv,
-                                   const std::vector<napi_value>& args,
-                                   napi_async_context context = nullptr) const;
+                       const std::vector<napi_value>& args,
+                       napi_async_context context = nullptr) const;
   MaybeOrValue<Value> MakeCallback(napi_value recv,
-                                   size_t argc,
-                                   const napi_value* args,
-                                   napi_async_context context = nullptr) const;
+                       size_t argc,
+                       const napi_value* args,
+                       napi_async_context context = nullptr) const;
 
   MaybeOrValue<Object> New(const std::initializer_list<napi_value>& args) const;
   MaybeOrValue<Object> New(const std::vector<napi_value>& args) const;
   MaybeOrValue<Object> New(size_t argc, const napi_value* args) const;
-};
+  };
 
 class Promise : public Object {
  public:
@@ -1491,18 +1516,18 @@ class Promise : public Object {
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Promise(napi_env env, napi_value value);
-};
+    Promise(napi_env env, napi_value value);
+  };
 
-template <typename T>
-class Buffer : public Uint8Array {
- public:
-  static Buffer<T> New(napi_env env, size_t length);
+  template <typename T>
+  class Buffer : public Uint8Array {
+  public:
+    static Buffer<T> New(napi_env env, size_t length);
 #ifndef NODE_API_NO_EXTERNAL_BUFFERS_ALLOWED
-  static Buffer<T> New(napi_env env, T* data, size_t length);
+    static Buffer<T> New(napi_env env, T* data, size_t length);
 
-  // Finalizer must implement `void operator()(Env env, T* data)`.
-  template <typename Finalizer>
+    // Finalizer must implement `void operator()(Env env, T* data)`.
+    template <typename Finalizer>
   static Buffer<T> New(napi_env env,
                        T* data,
                        size_t length,
@@ -1521,47 +1546,47 @@ class Buffer : public Uint8Array {
   template <typename Finalizer>
   static Buffer<T> NewOrCopy(napi_env env,
                              T* data,
-                             size_t length,
-                             Finalizer finalizeCallback);
-  // Finalizer must implement `void operator()(Env env, T* data, Hint* hint)`.
-  template <typename Finalizer, typename Hint>
+                         size_t length,
+                         Finalizer finalizeCallback);
+    // Finalizer must implement `void operator()(Env env, T* data, Hint* hint)`.
+    template <typename Finalizer, typename Hint>
   static Buffer<T> NewOrCopy(napi_env env,
                              T* data,
-                             size_t length,
-                             Finalizer finalizeCallback,
-                             Hint* finalizeHint);
+                         size_t length,
+                         Finalizer finalizeCallback,
+                         Hint* finalizeHint);
 
-  static Buffer<T> Copy(napi_env env, const T* data, size_t length);
+    static Buffer<T> Copy(napi_env env, const T* data, size_t length);
 
   static void CheckCast(napi_env env, napi_value value);
 
-  Buffer();
-  Buffer(napi_env env, napi_value value);
-  size_t Length() const;
-  T* Data() const;
+    Buffer();
+    Buffer(napi_env env, napi_value value);
+    size_t Length() const;
+    T* Data() const;
 
- private:
-};
+  private:
+  };
 
 /// Holds a counted reference to a value; initially a weak reference unless
 /// otherwise specified, may be changed to/from a strong reference by adjusting
 /// the refcount.
-///
+  ///
 /// The referenced value is not immediately destroyed when the reference count
 /// is zero; it is merely then eligible for garbage-collection if there are no
 /// other references to the value.
-template <typename T>
-class Reference {
- public:
-  static Reference<T> New(const T& value, uint32_t initialRefcount = 0);
+  template <typename T>
+  class Reference {
+  public:
+    static Reference<T> New(const T& value, uint32_t initialRefcount = 0);
 
   Reference();
   Reference(napi_env env, napi_ref ref);
   ~Reference();
 
-  // A reference can be moved but cannot be copied.
-  Reference(Reference<T>&& other);
-  Reference<T>& operator=(Reference<T>&& other);
+    // A reference can be moved but cannot be copied.
+    Reference(Reference<T>&& other);
+    Reference<T>& operator =(Reference<T>&& other);
   NAPI_DISALLOW_ASSIGN(Reference<T>)
 
   operator napi_ref() const;
@@ -1577,15 +1602,15 @@ class Reference {
 
   uint32_t Ref() const;
   uint32_t Unref() const;
-  void Reset();
-  void Reset(const T& value, uint32_t refcount = 0);
+    void Reset();
+    void Reset(const T& value, uint32_t refcount = 0);
 
   // Call this on a reference that is declared as static data, to prevent its
   // destructor from running at program shutdown time, which would attempt to
   // reset the reference when the environment is no longer valid. Avoid using
   // this if at all possible. If you do need to use static data, MAKE SURE to
   // warn your users that your addon is NOT threadsafe.
-  void SuppressDestruct();
+    void SuppressDestruct();
 
  protected:
   Reference(const Reference<T>&);
@@ -1604,11 +1629,11 @@ class ObjectReference : public Reference<Object> {
   ObjectReference();
   ObjectReference(napi_env env, napi_ref ref);
 
-  // A reference can be moved but cannot be copied.
-  ObjectReference(Reference<Object>&& other);
-  ObjectReference& operator=(Reference<Object>&& other);
-  ObjectReference(ObjectReference&& other);
-  ObjectReference& operator=(ObjectReference&& other);
+    // A reference can be moved but cannot be copied.
+    ObjectReference(Reference<Object>&& other);
+    ObjectReference& operator =(Reference<Object>&& other);
+    ObjectReference(ObjectReference&& other);
+    ObjectReference& operator =(ObjectReference&& other);
   NAPI_DISALLOW_ASSIGN(ObjectReference)
 
   MaybeOrValue<Napi::Value> Get(const char* utf8name) const;
@@ -1642,11 +1667,11 @@ class FunctionReference : public Reference<Function> {
   FunctionReference();
   FunctionReference(napi_env env, napi_ref ref);
 
-  // A reference can be moved but cannot be copied.
-  FunctionReference(Reference<Function>&& other);
-  FunctionReference& operator=(Reference<Function>&& other);
-  FunctionReference(FunctionReference&& other);
-  FunctionReference& operator=(FunctionReference&& other);
+    // A reference can be moved but cannot be copied.
+    FunctionReference(Reference<Function>&& other);
+    FunctionReference& operator =(Reference<Function>&& other);
+    FunctionReference(FunctionReference&& other);
+    FunctionReference& operator =(FunctionReference&& other);
   NAPI_DISALLOW_ASSIGN_COPY(FunctionReference)
 
   MaybeOrValue<Napi::Value> operator()(
@@ -1665,33 +1690,33 @@ class FunctionReference : public Reference<Function> {
 
   MaybeOrValue<Napi::Value> MakeCallback(
       napi_value recv,
-      const std::initializer_list<napi_value>& args,
-      napi_async_context context = nullptr) const;
+                             const std::initializer_list<napi_value>& args,
+                             napi_async_context context = nullptr) const;
   MaybeOrValue<Napi::Value> MakeCallback(
       napi_value recv,
-      const std::vector<napi_value>& args,
-      napi_async_context context = nullptr) const;
+                             const std::vector<napi_value>& args,
+                             napi_async_context context = nullptr) const;
   MaybeOrValue<Napi::Value> MakeCallback(
       napi_value recv,
-      size_t argc,
-      const napi_value* args,
-      napi_async_context context = nullptr) const;
+                             size_t argc,
+                             const napi_value* args,
+                             napi_async_context context = nullptr) const;
 
   MaybeOrValue<Object> New(const std::initializer_list<napi_value>& args) const;
   MaybeOrValue<Object> New(const std::vector<napi_value>& args) const;
-};
+  };
 
-// Shortcuts to creating a new reference with inferred type and refcount = 0.
+  // Shortcuts to creating a new reference with inferred type and refcount = 0.
 template <typename T>
 Reference<T> Weak(T value);
-ObjectReference Weak(Object value);
-FunctionReference Weak(Function value);
+  ObjectReference Weak(Object value);
+  FunctionReference Weak(Function value);
 
-// Shortcuts to creating a new reference with inferred type and refcount = 1.
+  // Shortcuts to creating a new reference with inferred type and refcount = 1.
 template <typename T>
 Reference<T> Persistent(T value);
-ObjectReference Persistent(Object value);
-FunctionReference Persistent(Function value);
+  ObjectReference Persistent(Object value);
+  FunctionReference Persistent(Function value);
 
 #if defined(__GNUC__)
 #define NAPI_NO_RETURN __attribute__((noreturn))
@@ -1703,60 +1728,60 @@ FunctionReference Persistent(Function value);
 
 /// A persistent reference to a JavaScript error object. Use of this class
 /// depends somewhat on whether C++ exceptions are enabled at compile time.
-///
-/// ### Handling Errors With C++ Exceptions
-///
+  ///
+  /// ### Handling Errors With C++ Exceptions
+  ///
 /// If C++ exceptions are enabled, then the `Error` class extends
 /// `std::exception` and enables integrated error-handling for C++ exceptions
 /// and JavaScript exceptions.
-///
+  ///
 /// If a Node-API call fails without executing any JavaScript code (for
 /// example due to an invalid argument), then the Node-API wrapper
 /// automatically converts and throws the error as a C++ exception of type
 /// `Napi::Error`. Or if a JavaScript function called by C++ code via Node-API
 /// throws a JavaScript exception, then the Node-API wrapper automatically
 /// converts and throws it as a C++ exception of type `Napi::Error`.
-///
+  ///
 /// If a C++ exception of type `Napi::Error` escapes from a Node-API C++
 /// callback, then the Node-API wrapper automatically converts and throws it
 /// as a JavaScript exception. Therefore, catching a C++ exception of type
 /// `Napi::Error` prevents a JavaScript exception from being thrown.
-///
-/// #### Example 1A - Throwing a C++ exception:
-///
-///     Napi::Env env = ...
-///     throw Napi::Error::New(env, "Example exception");
-///
+  ///
+  /// #### Example 1A - Throwing a C++ exception:
+  ///
+  ///     Napi::Env env = ...
+  ///     throw Napi::Error::New(env, "Example exception");
+  ///
 /// Following C++ statements will not be executed. The exception will bubble
 /// up as a C++ exception of type `Napi::Error`, until it is either caught
 /// while still in C++, or else automatically propataged as a JavaScript
 /// exception when the callback returns to JavaScript.
-///
+  ///
 /// #### Example 2A - Propagating a Node-API C++ exception:
-///
-///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
-///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
-///
+  ///
+  ///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
+  ///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
+  ///
 /// Following C++ statements will not be executed. The exception will bubble
 /// up as a C++ exception of type `Napi::Error`, until it is either caught
 /// while still in C++, or else automatically propagated as a JavaScript
 /// exception when the callback returns to JavaScript.
-///
+  ///
 /// #### Example 3A - Handling a Node-API C++ exception:
-///
-///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
-///     Napi::Value result;
-///     try {
-///        result = jsFunctionThatThrows({ arg1, arg2 });
-///     } catch (const Napi::Error& e) {
-///       cerr << "Caught JavaScript exception: " + e.what();
-///     }
-///
+  ///
+  ///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
+  ///     Napi::Value result;
+  ///     try {
+  ///        result = jsFunctionThatThrows({ arg1, arg2 });
+  ///     } catch (const Napi::Error& e) {
+  ///       cerr << "Caught JavaScript exception: " + e.what();
+  ///     }
+  ///
 /// Since the exception was caught here, it will not be propagated as a
 /// JavaScript exception.
-///
-/// ### Handling Errors Without C++ Exceptions
-///
+  ///
+  /// ### Handling Errors Without C++ Exceptions
+  ///
 /// If C++ exceptions are disabled (by defining `NAPI_DISABLE_CPP_EXCEPTIONS`)
 /// then this class does not extend `std::exception`, and APIs in the `Napi`
 /// namespace do not throw C++ exceptions when they fail. Instead, they raise
@@ -1765,59 +1790,59 @@ FunctionReference Persistent(Function value);
 /// and may use methods on the `Env` class to check for, get, and clear a
 /// pending JavaScript exception. If the pending exception is not cleared, it
 /// will be thrown when the native callback returns to JavaScript.
-///
-/// #### Example 1B - Throwing a JS exception
-///
-///     Napi::Env env = ...
+  ///
+  /// #### Example 1B - Throwing a JS exception
+  ///
+  ///     Napi::Env env = ...
 ///     Napi::Error::New(env, "Example
 ///     exception").ThrowAsJavaScriptException(); return;
-///
+  ///
 /// After throwing a JS exception, the code should generally return
 /// immediately from the native callback, after performing any necessary
 /// cleanup.
-///
+  ///
 /// #### Example 2B - Propagating a Node-API JS exception:
-///
-///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
-///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
-///     if (result.IsEmpty()) return;
-///
+  ///
+  ///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
+  ///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
+  ///     if (result.IsEmpty()) return;
+  ///
 /// An empty value result from a Node-API call indicates an error occurred,
 /// and a JavaScript exception is pending. To let the exception propagate, the
 /// code should generally return immediately from the native callback, after
 /// performing any necessary cleanup.
-///
+  ///
 /// #### Example 3B - Handling a Node-API JS exception:
-///
-///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
-///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
-///     if (result.IsEmpty()) {
-///       Napi::Error e = env.GetAndClearPendingException();
-///       cerr << "Caught JavaScript exception: " + e.Message();
-///     }
-///
+  ///
+  ///     Napi::Function jsFunctionThatThrows = someObj.As<Napi::Function>();
+  ///     Napi::Value result = jsFunctionThatThrows({ arg1, arg2 });
+  ///     if (result.IsEmpty()) {
+  ///       Napi::Error e = env.GetAndClearPendingException();
+  ///       cerr << "Caught JavaScript exception: " + e.Message();
+  ///     }
+  ///
 /// Since the exception was cleared here, it will not be propagated as a
 /// JavaScript exception after the native callback returns.
-class Error : public ObjectReference
+  class Error : public ObjectReference
 #ifdef NAPI_CPP_EXCEPTIONS
     ,
               public std::exception
-#endif  // NAPI_CPP_EXCEPTIONS
-{
- public:
-  static Error New(napi_env env);
-  static Error New(napi_env env, const char* message);
-  static Error New(napi_env env, const std::string& message);
+#endif // NAPI_CPP_EXCEPTIONS
+    {
+  public:
+    static Error New(napi_env env);
+    static Error New(napi_env env, const char* message);
+    static Error New(napi_env env, const std::string& message);
 
-  static NAPI_NO_RETURN void Fatal(const char* location, const char* message);
+    static NAPI_NO_RETURN void Fatal(const char* location, const char* message);
 
   Error();
   Error(napi_env env, napi_value value);
 
-  // An error can be moved or copied.
-  Error(Error&& other);
-  Error& operator=(Error&& other);
-  Error(const Error&);
+    // An error can be moved or copied.
+    Error(Error&& other);
+    Error& operator =(Error&& other);
+    Error(const Error&);
   Error& operator=(const Error&);
 
   const std::string& Message() const NAPI_NOEXCEPT;
@@ -1829,8 +1854,8 @@ class Error : public ObjectReference
   const char* what() const NAPI_NOEXCEPT override;
 #endif  // NAPI_CPP_EXCEPTIONS
 
- protected:
-  /// !cond INTERNAL
+  protected:
+    /// !cond INTERNAL
   using create_error_fn = napi_status (*)(napi_env envb,
                                           napi_value code,
                                           napi_value msg,
@@ -1843,10 +1868,10 @@ class Error : public ObjectReference
                     create_error_fn create_error);
   /// !endcond
 
- private:
+  private:
   static inline const char* ERROR_WRAP_VALUE() NAPI_NOEXCEPT;
-  mutable std::string _message;
-};
+    mutable std::string _message;
+  };
 
 class TypeError : public Error {
  public:
@@ -1862,9 +1887,9 @@ class RangeError : public Error {
   static RangeError New(napi_env env, const char* message);
   static RangeError New(napi_env env, const std::string& message);
 
-  RangeError();
-  RangeError(napi_env env, napi_value value);
-};
+    RangeError();
+    RangeError(napi_env env, napi_value value);
+  };
 
 #if NAPI_VERSION > 8
 class SyntaxError : public Error {
@@ -1882,17 +1907,17 @@ class CallbackInfo {
   CallbackInfo(napi_env env, napi_callback_info info);
   ~CallbackInfo();
 
-  // Disallow copying to prevent multiple free of _dynamicArgs
+    // Disallow copying to prevent multiple free of _dynamicArgs
   NAPI_DISALLOW_ASSIGN_COPY(CallbackInfo)
 
-  Napi::Env Env() const;
-  Value NewTarget() const;
-  bool IsConstructCall() const;
-  size_t Length() const;
-  const Value operator[](size_t index) const;
-  Value This() const;
-  void* Data() const;
-  void SetData(void* data);
+    Napi::Env Env() const;
+    Value NewTarget() const;
+    bool IsConstructCall() const;
+    size_t Length() const;
+    const Value operator [](size_t index) const;
+    Value This() const;
+    void* Data() const;
+    void SetData(void* data);
   explicit operator napi_callback_info() const;
 
  private:
@@ -1907,122 +1932,122 @@ class CallbackInfo {
   void* _data;
 };
 
-class PropertyDescriptor {
- public:
+  class PropertyDescriptor {
+  public:
   using GetterCallback = Napi::Value (*)(const Napi::CallbackInfo& info);
   using SetterCallback = void (*)(const Napi::CallbackInfo& info);
 
 #ifndef NODE_ADDON_API_DISABLE_DEPRECATED
-  template <typename Getter>
+    template <typename Getter>
   static PropertyDescriptor Accessor(
       const char* utf8name,
-      Getter getter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter>
+                                       Getter getter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter>
   static PropertyDescriptor Accessor(
       const std::string& utf8name,
-      Getter getter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter>
+                                       Getter getter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter>
   static PropertyDescriptor Accessor(
       napi_value name,
-      Getter getter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter>
+                                       Getter getter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter>
   static PropertyDescriptor Accessor(
       Name name,
-      Getter getter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter, typename Setter>
+                                       Getter getter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter, typename Setter>
   static PropertyDescriptor Accessor(
       const char* utf8name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter, typename Setter>
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter, typename Setter>
   static PropertyDescriptor Accessor(
       const std::string& utf8name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter, typename Setter>
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter, typename Setter>
   static PropertyDescriptor Accessor(
       napi_value name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter, typename Setter>
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter, typename Setter>
   static PropertyDescriptor Accessor(
       Name name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       const char* utf8name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       const std::string& utf8name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       napi_value name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       Name name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-#endif  // !NODE_ADDON_API_DISABLE_DEPRECATED
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+#endif // !NODE_ADDON_API_DISABLE_DEPRECATED
 
   template <GetterCallback Getter>
   static PropertyDescriptor Accessor(
-      const char* utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                       const char* utf8name,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
 
   template <GetterCallback Getter>
+  static PropertyDescriptor Accessor(
+                                       const std::string& utf8name,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+
+  template <GetterCallback Getter>
+  static PropertyDescriptor Accessor(
+                                       Name name,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+
+  template <GetterCallback Getter, SetterCallback Setter>
+  static PropertyDescriptor Accessor(
+                                       const char* utf8name,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+
+  template <GetterCallback Getter, SetterCallback Setter>
   static PropertyDescriptor Accessor(
       const std::string& utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-
-  template <GetterCallback Getter>
-  static PropertyDescriptor Accessor(
-      Name name,
       napi_property_attributes attributes = napi_default,
       void* data = nullptr);
 
   template <GetterCallback Getter, SetterCallback Setter>
   static PropertyDescriptor Accessor(
-      const char* utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-
-  template <GetterCallback Getter, SetterCallback Setter>
-  static PropertyDescriptor Accessor(
-      const std::string& utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-
-  template <GetterCallback Getter, SetterCallback Setter>
-  static PropertyDescriptor Accessor(
       Name name,
       napi_property_attributes attributes = napi_default,
       void* data = nullptr);
@@ -2064,60 +2089,60 @@ class PropertyDescriptor {
   static PropertyDescriptor Accessor(
       Napi::Env env,
       Napi::Object object,
-      const std::string& utf8name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Getter, typename Setter>
+                                       const std::string& utf8name,
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Getter, typename Setter>
   static PropertyDescriptor Accessor(
       Napi::Env env,
-      Napi::Object object,
-      Name name,
-      Getter getter,
-      Setter setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Napi::Object object,
+                                       Name name,
+                                       Getter getter,
+                                       Setter setter,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       Napi::Env env,
-      Napi::Object object,
-      const char* utf8name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Napi::Object object,
+                                       const char* utf8name,
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       Napi::Env env,
-      Napi::Object object,
-      const std::string& utf8name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
-  template <typename Callable>
+                                       Napi::Object object,
+                                       const std::string& utf8name,
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
+    template <typename Callable>
   static PropertyDescriptor Function(
       Napi::Env env,
-      Napi::Object object,
-      Name name,
-      Callable cb,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                       Napi::Object object,
+                                       Name name,
+                                       Callable cb,
+                                       napi_property_attributes attributes = napi_default,
+                                       void* data = nullptr);
   static PropertyDescriptor Value(
       const char* utf8name,
-      napi_value value,
-      napi_property_attributes attributes = napi_default);
+                                    napi_value value,
+                                    napi_property_attributes attributes = napi_default);
   static PropertyDescriptor Value(
       const std::string& utf8name,
-      napi_value value,
-      napi_property_attributes attributes = napi_default);
+                                    napi_value value,
+                                    napi_property_attributes attributes = napi_default);
   static PropertyDescriptor Value(
       napi_value name,
-      napi_value value,
-      napi_property_attributes attributes = napi_default);
+                                    napi_value value,
+                                    napi_property_attributes attributes = napi_default);
   static PropertyDescriptor Value(
       Name name,
-      Napi::Value value,
-      napi_property_attributes attributes = napi_default);
+                                    Napi::Value value,
+                                    napi_property_attributes attributes = napi_default);
 
   PropertyDescriptor(napi_property_descriptor desc);
 
@@ -2128,16 +2153,16 @@ class PropertyDescriptor {
   napi_property_descriptor _desc;
 };
 
-/// Property descriptor for use with `ObjectWrap::DefineClass()`.
-///
+  /// Property descriptor for use with `ObjectWrap::DefineClass()`.
+  ///
 /// This is different from the standalone `PropertyDescriptor` because it is
 /// specific to each `ObjectWrap<T>` subclass. This prevents using descriptors
 /// from a different class when defining a new class (preventing the callbacks
 /// from having incorrect `this` pointers).
-template <typename T>
-class ClassPropertyDescriptor {
- public:
-  ClassPropertyDescriptor(napi_property_descriptor desc) : _desc(desc) {}
+  template <typename T>
+  class ClassPropertyDescriptor {
+  public:
+    ClassPropertyDescriptor(napi_property_descriptor desc) : _desc(desc) {}
 
   operator napi_property_descriptor&() { return _desc; }
   operator const napi_property_descriptor&() const { return _desc; }
@@ -2286,35 +2311,35 @@ class InstanceWrap {
 /// Base class to be extended by C++ classes exposed to JavaScript; each C++
 /// class instance gets "wrapped" by a JavaScript object that is managed by this
 /// class.
-///
-/// At initialization time, the `DefineClass()` method must be used to
-/// hook up the accessor and method callbacks. It takes a list of
-/// property descriptors, which can be constructed via the various
-/// static methods on the base class.
-///
-/// #### Example:
-///
-///     class Example: public Napi::ObjectWrap<Example> {
-///       public:
-///         static void Initialize(Napi::Env& env, Napi::Object& target) {
-///           Napi::Function constructor = DefineClass(env, "Example", {
+  ///
+  /// At initialization time, the `DefineClass()` method must be used to
+  /// hook up the accessor and method callbacks. It takes a list of
+  /// property descriptors, which can be constructed via the various
+  /// static methods on the base class.
+  ///
+  /// #### Example:
+  ///
+  ///     class Example: public Napi::ObjectWrap<Example> {
+  ///       public:
+  ///         static void Initialize(Napi::Env& env, Napi::Object& target) {
+  ///           Napi::Function constructor = DefineClass(env, "Example", {
 ///             InstanceAccessor<&Example::GetSomething,
 ///             &Example::SetSomething>("value"),
 ///             InstanceMethod<&Example::DoSomething>("doSomething"),
-///           });
-///           target.Set("Example", constructor);
-///         }
-///
-///         Example(const Napi::CallbackInfo& info); // Constructor
-///         Napi::Value GetSomething(const Napi::CallbackInfo& info);
+  ///           });
+  ///           target.Set("Example", constructor);
+  ///         }
+  ///
+  ///         Example(const Napi::CallbackInfo& info); // Constructor
+  ///         Napi::Value GetSomething(const Napi::CallbackInfo& info);
 ///         void SetSomething(const Napi::CallbackInfo& info, const Napi::Value&
 ///         value); Napi::Value DoSomething(const Napi::CallbackInfo& info);
-///     }
-template <typename T>
+  ///     }
+  template <typename T>
 class ObjectWrap : public InstanceWrap<T>, public Reference<Object> {
- public:
-  ObjectWrap(const CallbackInfo& callbackInfo);
-  virtual ~ObjectWrap();
+  public:
+    ObjectWrap(const CallbackInfo& callbackInfo);
+    virtual ~ObjectWrap();
 
   static T* Unwrap(Object wrapper);
 
@@ -2330,87 +2355,87 @@ class ObjectWrap : public InstanceWrap<T>, public Reference<Object> {
 
   static Function DefineClass(
       Napi::Env env,
-      const char* utf8name,
-      const std::initializer_list<PropertyDescriptor>& properties,
-      void* data = nullptr);
-  static Function DefineClass(Napi::Env env,
-                              const char* utf8name,
-                              const std::vector<PropertyDescriptor>& properties,
-                              void* data = nullptr);
+                                const char* utf8name,
+                                const std::initializer_list<PropertyDescriptor>& properties,
+                                void* data = nullptr);
+    static Function DefineClass(Napi::Env env,
+                                const char* utf8name,
+                                const std::vector<PropertyDescriptor>& properties,
+                                void* data = nullptr);
   static PropertyDescriptor StaticMethod(
       const char* utf8name,
-      StaticVoidMethodCallback method,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                           StaticVoidMethodCallback method,
+                                           napi_property_attributes attributes = napi_default,
+                                           void* data = nullptr);
   static PropertyDescriptor StaticMethod(
       const char* utf8name,
-      StaticMethodCallback method,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                           StaticMethodCallback method,
+                                           napi_property_attributes attributes = napi_default,
+                                           void* data = nullptr);
   static PropertyDescriptor StaticMethod(
       Symbol name,
-      StaticVoidMethodCallback method,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                           StaticVoidMethodCallback method,
+                                           napi_property_attributes attributes = napi_default,
+                                           void* data = nullptr);
   static PropertyDescriptor StaticMethod(
       Symbol name,
-      StaticMethodCallback method,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                           StaticMethodCallback method,
+                                           napi_property_attributes attributes = napi_default,
+                                           void* data = nullptr);
   template <StaticVoidMethodCallback method>
   static PropertyDescriptor StaticMethod(
       const char* utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   template <StaticVoidMethodCallback method>
   static PropertyDescriptor StaticMethod(
       Symbol name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   template <StaticMethodCallback method>
   static PropertyDescriptor StaticMethod(
       const char* utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   template <StaticMethodCallback method>
   static PropertyDescriptor StaticMethod(
       Symbol name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   static PropertyDescriptor StaticAccessor(
       const char* utf8name,
       StaticGetterCallback getter,
       StaticSetterCallback setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   static PropertyDescriptor StaticAccessor(
       Symbol name,
       StaticGetterCallback getter,
       StaticSetterCallback setter,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                             napi_property_attributes attributes = napi_default,
+                                             void* data = nullptr);
   template <StaticGetterCallback getter, StaticSetterCallback setter = nullptr>
   static PropertyDescriptor StaticAccessor(
       const char* utf8name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                               napi_property_attributes attributes = napi_default,
+                                               void* data = nullptr);
   template <StaticGetterCallback getter, StaticSetterCallback setter = nullptr>
   static PropertyDescriptor StaticAccessor(
       Symbol name,
-      napi_property_attributes attributes = napi_default,
-      void* data = nullptr);
+                                               napi_property_attributes attributes = napi_default,
+                                               void* data = nullptr);
   static PropertyDescriptor StaticValue(
       const char* utf8name,
-      Napi::Value value,
-      napi_property_attributes attributes = napi_default);
+                                            Napi::Value value,
+                                            napi_property_attributes attributes = napi_default);
   static PropertyDescriptor StaticValue(
       Symbol name,
-      Napi::Value value,
-      napi_property_attributes attributes = napi_default);
+                                            Napi::Value value,
+                                            napi_property_attributes attributes = napi_default);
   static Napi::Value OnCalledAsFunction(const Napi::CallbackInfo& callbackInfo);
-  virtual void Finalize(Napi::Env env);
+    virtual void Finalize(Napi::Env env);
 
- private:
+  private:
   using This = ObjectWrap<T>;
 
   static napi_value ConstructorCallbackWrapper(napi_env env,
@@ -2423,12 +2448,12 @@ class ObjectWrap : public InstanceWrap<T>, public Reference<Object> {
                                                 napi_callback_info info);
   static napi_value StaticSetterCallbackWrapper(napi_env env,
                                                 napi_callback_info info);
-  static void FinalizeCallback(napi_env env, void* data, void* hint);
-  static Function DefineClass(Napi::Env env,
-                              const char* utf8name,
-                              const size_t props_count,
-                              const napi_property_descriptor* props,
-                              void* data = nullptr);
+    static void FinalizeCallback(napi_env env, void* data, void* hint);
+    static Function DefineClass(Napi::Env env,
+                                const char* utf8name,
+                                const size_t props_count,
+                                const napi_property_descriptor* props,
+                                void* data = nullptr);
 
   using StaticVoidMethodCallbackData =
       MethodCallbackData<T, StaticVoidMethodCallback>;
@@ -2454,7 +2479,7 @@ class ObjectWrap : public InstanceWrap<T>, public Reference<Object> {
   }
 
   bool _construction_failed = true;
-};
+  };
 
 class HandleScope {
  public:
@@ -2465,7 +2490,7 @@ class HandleScope {
   // Disallow copying to prevent double close of napi_handle_scope
   NAPI_DISALLOW_ASSIGN_COPY(HandleScope)
 
-  operator napi_handle_scope() const;
+    operator napi_handle_scope() const;
 
   Napi::Env Env() const;
 
@@ -2483,7 +2508,7 @@ class EscapableHandleScope {
   // Disallow copying to prevent double close of napi_escapable_handle_scope
   NAPI_DISALLOW_ASSIGN_COPY(EscapableHandleScope)
 
-  operator napi_escapable_handle_scope() const;
+    operator napi_escapable_handle_scope() const;
 
   Napi::Env Env() const;
   Value Escape(napi_value escapee);
@@ -2503,7 +2528,7 @@ class CallbackScope {
   // Disallow copying to prevent double close of napi_callback_scope
   NAPI_DISALLOW_ASSIGN_COPY(CallbackScope)
 
-  operator napi_callback_scope() const;
+    operator napi_callback_scope() const;
 
   Napi::Env Env() const;
 
@@ -2513,31 +2538,31 @@ class CallbackScope {
 };
 #endif
 
-class AsyncContext {
- public:
-  explicit AsyncContext(napi_env env, const char* resource_name);
+  class AsyncContext {
+  public:
+    explicit AsyncContext(napi_env env, const char* resource_name);
   explicit AsyncContext(napi_env env,
                         const char* resource_name,
                         const Object& resource);
-  virtual ~AsyncContext();
+    virtual ~AsyncContext();
 
-  AsyncContext(AsyncContext&& other);
-  AsyncContext& operator=(AsyncContext&& other);
+    AsyncContext(AsyncContext&& other);
+    AsyncContext& operator =(AsyncContext&& other);
   NAPI_DISALLOW_ASSIGN_COPY(AsyncContext)
 
   operator napi_async_context() const;
 
   Napi::Env Env() const;
 
- private:
-  napi_env _env;
-  napi_async_context _context;
-};
+  private:
+    napi_env _env;
+    napi_async_context _context;
+  };
 
 #if NAPI_HAS_THREADS
-class AsyncWorker {
- public:
-  virtual ~AsyncWorker();
+  class AsyncWorker {
+  public:
+    virtual ~AsyncWorker();
 
   NAPI_DISALLOW_ASSIGN_COPY(AsyncWorker)
 
@@ -2555,26 +2580,26 @@ class AsyncWorker {
   virtual void OnExecute(Napi::Env env);
   virtual void OnWorkComplete(Napi::Env env, napi_status status);
 
- protected:
-  explicit AsyncWorker(const Function& callback);
+  protected:
+    explicit AsyncWorker(const Function& callback);
   explicit AsyncWorker(const Function& callback, const char* resource_name);
-  explicit AsyncWorker(const Function& callback,
-                       const char* resource_name,
-                       const Object& resource);
+    explicit AsyncWorker(const Function& callback,
+                         const char* resource_name,
+                         const Object& resource);
   explicit AsyncWorker(const Object& receiver, const Function& callback);
-  explicit AsyncWorker(const Object& receiver,
-                       const Function& callback,
-                       const char* resource_name);
-  explicit AsyncWorker(const Object& receiver,
-                       const Function& callback,
-                       const char* resource_name,
-                       const Object& resource);
+    explicit AsyncWorker(const Object& receiver,
+                         const Function& callback,
+                         const char* resource_name);
+    explicit AsyncWorker(const Object& receiver,
+                         const Function& callback,
+                         const char* resource_name,
+                         const Object& resource);
 
-  explicit AsyncWorker(Napi::Env env);
+    explicit AsyncWorker(Napi::Env env);
   explicit AsyncWorker(Napi::Env env, const char* resource_name);
-  explicit AsyncWorker(Napi::Env env,
-                       const char* resource_name,
-                       const Object& resource);
+    explicit AsyncWorker(Napi::Env env,
+                         const char* resource_name,
+                         const Object& resource);
 
   virtual void Execute() = 0;
   virtual void OnOK();
@@ -2584,31 +2609,31 @@ class AsyncWorker {
 
   void SetError(const std::string& error);
 
- private:
+  private:
   static inline void OnAsyncWorkExecute(napi_env env, void* asyncworker);
   static inline void OnAsyncWorkComplete(napi_env env,
-                                         napi_status status,
+                               napi_status status,
                                          void* asyncworker);
 
-  napi_env _env;
-  napi_async_work _work;
-  ObjectReference _receiver;
-  FunctionReference _callback;
-  std::string _error;
-  bool _suppress_destruct;
-};
+    napi_env _env;
+    napi_async_work _work;
+    ObjectReference _receiver;
+    FunctionReference _callback;
+    std::string _error;
+    bool _suppress_destruct;
+  };
 #endif  // NAPI_HAS_THREADS
 
 #if (NAPI_VERSION > 3 && NAPI_HAS_THREADS)
-class ThreadSafeFunction {
- public:
-  // This API may only be called from the main thread.
-  template <typename ResourceString>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount);
+  class ThreadSafeFunction {
+  public:
+    // This API may only be called from the main thread.
+    template <typename ResourceString>
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount);
 
   // This API may only be called from the main thread.
   template <typename ResourceString, typename ContextType>
@@ -2628,17 +2653,17 @@ class ThreadSafeFunction {
                                 size_t initialThreadCount,
                                 Finalizer finalizeCallback);
 
-  // This API may only be called from the main thread.
+    // This API may only be called from the main thread.
   template <typename ResourceString,
             typename Finalizer,
-            typename FinalizerDataType>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount,
-                                Finalizer finalizeCallback,
-                                FinalizerDataType* data);
+              typename FinalizerDataType>
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount,
+                                  Finalizer finalizeCallback,
+                                  FinalizerDataType* data);
 
   // This API may only be called from the main thread.
   template <typename ResourceString, typename ContextType, typename Finalizer>
@@ -2650,19 +2675,19 @@ class ThreadSafeFunction {
                                 ContextType* context,
                                 Finalizer finalizeCallback);
 
-  // This API may only be called from the main thread.
+    // This API may only be called from the main thread.
   template <typename ResourceString,
             typename ContextType,
             typename Finalizer,
             typename FinalizerDataType>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount,
-                                ContextType* context,
-                                Finalizer finalizeCallback,
-                                FinalizerDataType* data);
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount,
+                                  ContextType* context,
+                                  Finalizer finalizeCallback,
+                                  FinalizerDataType* data);
 
   // This API may only be called from the main thread.
   template <typename ResourceString>
@@ -2693,18 +2718,18 @@ class ThreadSafeFunction {
                                 size_t initialThreadCount,
                                 Finalizer finalizeCallback);
 
-  // This API may only be called from the main thread.
+    // This API may only be called from the main thread.
   template <typename ResourceString,
             typename Finalizer,
-            typename FinalizerDataType>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                const Object& resource,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount,
-                                Finalizer finalizeCallback,
-                                FinalizerDataType* data);
+              typename FinalizerDataType>
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  const Object& resource,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount,
+                                  Finalizer finalizeCallback,
+                                  FinalizerDataType* data);
 
   // This API may only be called from the main thread.
   template <typename ResourceString, typename ContextType, typename Finalizer>
@@ -2717,20 +2742,20 @@ class ThreadSafeFunction {
                                 ContextType* context,
                                 Finalizer finalizeCallback);
 
-  // This API may only be called from the main thread.
+    // This API may only be called from the main thread.
   template <typename ResourceString,
             typename ContextType,
             typename Finalizer,
             typename FinalizerDataType>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                const Object& resource,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount,
-                                ContextType* context,
-                                Finalizer finalizeCallback,
-                                FinalizerDataType* data);
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  const Object& resource,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount,
+                                  ContextType* context,
+                                  Finalizer finalizeCallback,
+                                  FinalizerDataType* data);
 
   ThreadSafeFunction();
   ThreadSafeFunction(napi_threadsafe_function tsFunctionValue);
@@ -2765,22 +2790,22 @@ class ThreadSafeFunction {
   // This API may only be called from the main thread.
   void Unref(napi_env env) const;
 
-  // This API may be called from any thread.
-  napi_status Acquire() const;
+    // This API may be called from any thread.
+    napi_status Acquire() const;
 
-  // This API may be called from any thread.
+    // This API may be called from any thread.
   napi_status Release() const;
 
-  // This API may be called from any thread.
+    // This API may be called from any thread.
   napi_status Abort() const;
 
   struct ConvertibleContext {
-    template <class T>
+      template <class T>
     operator T*() {
       return static_cast<T*>(context);
     }
-    void* context;
-  };
+      void* context;
+    };
 
   // This API may be called from any thread.
   ConvertibleContext GetContext() const;
@@ -2792,24 +2817,24 @@ class ThreadSafeFunction {
             typename ContextType,
             typename Finalizer,
             typename FinalizerDataType>
-  static ThreadSafeFunction New(napi_env env,
-                                const Function& callback,
-                                const Object& resource,
-                                ResourceString resourceName,
-                                size_t maxQueueSize,
-                                size_t initialThreadCount,
-                                ContextType* context,
-                                Finalizer finalizeCallback,
-                                FinalizerDataType* data,
-                                napi_finalize wrapper);
+    static ThreadSafeFunction New(napi_env env,
+                                  const Function& callback,
+                                  const Object& resource,
+                                  ResourceString resourceName,
+                                  size_t maxQueueSize,
+                                  size_t initialThreadCount,
+                                  ContextType* context,
+                                  Finalizer finalizeCallback,
+                                  FinalizerDataType* data,
+                                  napi_finalize wrapper);
 
   napi_status CallInternal(CallbackWrapper* callbackWrapper,
                            napi_threadsafe_function_call_mode mode) const;
 
-  static void CallJS(napi_env env,
-                     napi_value jsCallback,
-                     void* context,
-                     void* data);
+    static void CallJS(napi_env env,
+                       napi_value jsCallback,
+                       void* context,
+                       void* data);
 
   napi_threadsafe_function _tsfn;
 };
@@ -3038,7 +3063,7 @@ class AsyncProgressWorkerBase : public AsyncWorker {
                                    const char* resource_name,
                                    const Object& resource,
                                    size_t queue_size = 1);
-#endif
+  #endif
 
   static inline void OnAsyncWorkProgress(Napi::Env env,
                                          Napi::Function jsCallback,
@@ -3171,18 +3196,18 @@ class AsyncProgressQueueWorker
 };
 #endif  // NAPI_VERSION > 3 && NAPI_HAS_THREADS
 
-// Memory management.
-class MemoryManagement {
- public:
-  static int64_t AdjustExternalMemory(Env env, int64_t change_in_bytes);
-};
+  // Memory management.
+  class MemoryManagement {
+    public:
+      static int64_t AdjustExternalMemory(Env env, int64_t change_in_bytes);
+  };
 
-// Version management
-class VersionManagement {
- public:
-  static uint32_t GetNapiVersion(Env env);
-  static const napi_node_version* GetNodeVersion(Env env);
-};
+  // Version management
+  class VersionManagement {
+    public:
+      static uint32_t GetNapiVersion(Env env);
+      static const napi_node_version* GetNodeVersion(Env env);
+  };
 
 #if NAPI_VERSION > 5
 template <typename T>

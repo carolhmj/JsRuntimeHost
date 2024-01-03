@@ -261,7 +261,7 @@ namespace Babylon::Polyfills::Internal
                 }
                 catch (std::exception &e)
                 {
-                    Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();             
+                    Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
                 }
                 return;
             }

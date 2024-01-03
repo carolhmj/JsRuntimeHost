@@ -32,7 +32,7 @@ namespace node {
       OnScopeLeaveImpl(OnScopeLeaveImpl&& other)
         : fn_(std::move(other.fn_)), active_(other.active_) {
         other.active_ = false;
-      }
+  }
     };
 
     // Run a function when exiting the current scope. Used like this:
@@ -226,8 +226,8 @@ inline napi_status napi_clear_last_error(napi_env env) {
 
 inline napi_status napi_set_last_error(napi_env env,
                                        napi_status error_code,
-                                       uint32_t engine_error_code = 0,
-                                       void* engine_reserved = nullptr) {
+                                uint32_t engine_error_code = 0,
+                                void* engine_reserved = nullptr) {
   env->last_error.error_code = error_code;
   env->last_error.engine_error_code = engine_error_code;
   env->last_error.engine_reserved = engine_reserved;
@@ -256,6 +256,21 @@ inline napi_status napi_set_last_error(napi_env env,
     }                                                                          \
   } while (0)
 
+#define RETURN_STATUS_IF_FALSE_WITH_PREAMBLE(env, condition, status)           \
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      return napi_set_last_error(                                              \
+          (env), try_catch.HasCaught() ? napi_pending_exception : (status));   \
+    }                                                                          \
+  } while (0)
+
+#define CHECK_ENV(env)                                    \
+  do {                                                    \
+    if ((env) == nullptr) {                               \
+      return napi_invalid_arg;                            \
+    }                                                     \
+  } while (0)
+
 #define CHECK_ENV_NOT_IN_GC(env)                                               \
   do {                                                                         \
     CHECK_ENV((env));                                                          \
@@ -269,23 +284,23 @@ inline napi_status napi_set_last_error(napi_env env,
   RETURN_STATUS_IF_FALSE_WITH_PREAMBLE(                                        \
       (env), ((arg) != nullptr), napi_invalid_arg)
 
-#define CHECK_MAYBE_EMPTY(env, maybe, status)                                  \
+#define CHECK_MAYBE_EMPTY(env, maybe, status) \
   RETURN_STATUS_IF_FALSE((env), !((maybe).IsEmpty()), (status))
 
 #define CHECK_MAYBE_EMPTY_WITH_PREAMBLE(env, maybe, status)                    \
   RETURN_STATUS_IF_FALSE_WITH_PREAMBLE((env), !((maybe).IsEmpty()), (status))
 
 // NAPI_PREAMBLE is not wrapped in do..while: try_catch must have function scope
-#define NAPI_PREAMBLE(env)                                                     \
+#define NAPI_PREAMBLE(env)                                          \
   CHECK_ENV_NOT_IN_GC((env));                                                  \
   RETURN_STATUS_IF_FALSE(                                                      \
       (env), (env)->last_exception.IsEmpty(), napi_pending_exception);         \
-  RETURN_STATUS_IF_FALSE((env),                                                \
+  RETURN_STATUS_IF_FALSE((env),                                     \
                          (env)->can_call_into_js(),                            \
                          (env->module_api_version == NAPI_VERSION_EXPERIMENTAL \
                               ? napi_cannot_run_js                             \
                               : napi_pending_exception));                      \
-  napi_clear_last_error((env));                                                \
+  napi_clear_last_error((env));                                     \
   v8impl::TryCatch try_catch((env))
 
 #define CHECK_TO_TYPE(env, type, context, result, src, status)                 \
@@ -304,12 +319,20 @@ inline napi_status napi_set_last_error(napi_env env,
     (result) = maybe.ToLocalChecked();                                         \
   } while (0)
 
-#define CHECK_TO_FUNCTION(env, result, src)                                    \
+#define CHECK_TO_TYPE_WITH_PREAMBLE(env, type, context, result, src, status)   \
   do {                                                                         \
-    CHECK_ARG((env), (src));                                                   \
-    v8::Local<v8::Value> v8value = v8impl::V8LocalValueFromJsValue((src));     \
-    RETURN_STATUS_IF_FALSE((env), v8value->IsFunction(), napi_invalid_arg);    \
-    (result) = v8value.As<v8::Function>();                                     \
+    CHECK_ARG_WITH_PREAMBLE((env), (src));                                     \
+    auto maybe = v8impl::V8LocalValueFromJsValue((src))->To##type((context));  \
+    CHECK_MAYBE_EMPTY_WITH_PREAMBLE((env), maybe, (status));                   \
+    (result) = maybe.ToLocalChecked();                                         \
+  } while (0)
+
+#define CHECK_TO_FUNCTION(env, result, src)                                 \
+  do {                                                                      \
+    CHECK_ARG((env), (src));                                                \
+    v8::Local<v8::Value> v8value = v8impl::V8LocalValueFromJsValue((src));  \
+    RETURN_STATUS_IF_FALSE((env), v8value->IsFunction(), napi_invalid_arg); \
+    (result) = v8value.As<v8::Function>();                                  \
   } while (0)
 
 #define CHECK_TO_OBJECT(env, context, result, src)                             \
@@ -319,13 +342,13 @@ inline napi_status napi_set_last_error(napi_env env,
   CHECK_TO_TYPE_WITH_PREAMBLE(                                                 \
       (env), Object, (context), (result), (src), napi_object_expected)
 
-#define CHECK_TO_STRING(env, context, result, src)                             \
+#define CHECK_TO_STRING(env, context, result, src) \
   CHECK_TO_TYPE((env), String, (context), (result), (src), napi_string_expected)
 
-#define GET_RETURN_STATUS(env)                                                 \
+#define GET_RETURN_STATUS(env)      \
   (!try_catch.HasCaught()                                                      \
        ? napi_ok                                                               \
-       : napi_set_last_error((env), napi_pending_exception))
+                         : napi_set_last_error((env), napi_pending_exception))
 
 #define THROW_RANGE_ERROR_IF_FALSE(env, condition, error, message)             \
   do {                                                                         \
@@ -333,6 +356,15 @@ inline napi_status napi_set_last_error(napi_env env,
       napi_throw_range_error((env), (error), (message));                       \
       return napi_set_last_error((env), napi_generic_failure);                 \
     }                                                                          \
+  } while (0)
+
+#define CHECK_MAYBE_EMPTY_WITH_PREAMBLE(env, maybe, status)                    \
+  RETURN_STATUS_IF_FALSE_WITH_PREAMBLE((env), !((maybe).IsEmpty()), (status))
+
+#define STATUS_CALL(call)                                                      \
+  do {                                                                         \
+    napi_status status = (call);                                               \
+    if (status != napi_ok) return status;                                      \
   } while (0)
 
 #define CHECK_MAYBE_EMPTY_WITH_PREAMBLE(env, maybe, status)                    \
