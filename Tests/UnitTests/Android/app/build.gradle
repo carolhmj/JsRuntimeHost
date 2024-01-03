@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
 }
 
-def jsEngine = "JavaScriptCore"
+def jsEngine = "V8"
 if (project.hasProperty("jsEngine")) {
     jsEngine = project.property("jsEngine")
 }

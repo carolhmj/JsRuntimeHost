@@ -184,9 +184,6 @@ namespace Babylon::Polyfills::Internal
                     m_onopen.Call({});
                 }
             }
-            //catch (...)
-            //{
-            //    Napi::Error::New(Env(), std::current_exception())
             catch (std::exception& e)
             {
                 Napi::Error::New(Env(), e.what())
