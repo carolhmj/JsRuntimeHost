@@ -19,8 +19,6 @@ typedef uint16_t char16_t;
 #endif
 #endif
 
-#define NAPI_VERSION 8
-
 // JSVM API types are all opaque pointers for ABI stability
 // typedef undefined structs instead of void* for compile time type safety
 typedef struct napi_env__* napi_env;
@@ -41,13 +39,11 @@ typedef enum {
   // from instance properties. Ignored by napi_define_properties.
   napi_static = 1 << 10,
 
-#if NAPI_VERSION >= 8
   // Default for class methods.
   napi_default_method = napi_writable | napi_configurable,
 
   // Default for object properties, like in JS obj[prop].
   napi_default_jsproperty = napi_writable | napi_enumerable | napi_configurable,
-#endif  // NAPI_VERSION >= 8
 } napi_property_attributes;
 
 typedef enum {
@@ -139,7 +135,6 @@ typedef struct {
   napi_status error_code;
 } napi_extended_error_info;
 
-#if NAPI_VERSION >= 6
 typedef enum {
   napi_key_include_prototypes,
   napi_key_own_only
@@ -158,13 +153,9 @@ typedef enum {
   napi_key_keep_numbers,
   napi_key_numbers_to_strings
 } napi_key_conversion;
-#endif  // NAPI_VERSION >= 6
 
-#if NAPI_VERSION >= 8
 typedef struct {
   uint64_t lower;
   uint64_t upper;
 } napi_type_tag;
-#endif  // NAPI_VERSION >= 8
-
 #endif  // SRC_JS_NATIVE_API_TYPES_H_
