@@ -49,7 +49,6 @@ inline napi_status AttachData(napi_env env,
                               FreeType* data,
                               void* hint = nullptr) {
   napi_status status;
-#if (NAPI_VERSION < 5)
   napi_value symbol, external;
   status = napi_create_symbol(env, nullptr, &symbol);
   if (status == napi_ok) {
@@ -66,9 +65,6 @@ inline napi_status AttachData(napi_env env,
       status = napi_define_properties(env, obj, 1, &desc);
     }
   }
-#else  // NAPI_VERSION >= 5
-  status = napi_add_finalizer(env, obj, data, finalizer, hint, nullptr);
-#endif
   return status;
 }
 
@@ -4976,12 +4972,11 @@ inline CallbackScope::CallbackScope(napi_env env, napi_async_context context)
       napi_open_callback_scope(_env, Object::New(env), context, &_scope);
   NAPI_THROW_IF_FAILED_VOID(_env, status);
 }
-
-inline CallbackScope::~CallbackScope() {
+/*inline CallbackScope::~CallbackScope() {
   napi_status status = napi_close_callback_scope(_env, _scope);
   NAPI_FATAL_IF_FAILED(
       status, "CallbackScope::~CallbackScope", "napi_close_callback_scope");
-}
+}*/
 
 inline CallbackScope::operator napi_callback_scope() const {
   return _scope;
@@ -5012,12 +5007,12 @@ inline AsyncContext::AsyncContext(napi_env env,
   NAPI_THROW_IF_FAILED_VOID(_env, status);
 }
 
-inline AsyncContext::~AsyncContext() {
+/*inline AsyncContext::~AsyncContext() {
   if (_context != nullptr) {
     napi_async_destroy(_env, _context);
     _context = nullptr;
   }
-}
+}*/
 
 inline AsyncContext::AsyncContext(AsyncContext&& other) {
   _env = other._env;
@@ -5118,12 +5113,12 @@ inline AsyncWorker::AsyncWorker(Napi::Env env,
   NAPI_THROW_IF_FAILED_VOID(_env, status);
 }
 
-inline AsyncWorker::~AsyncWorker() {
+/*inline AsyncWorker::~AsyncWorker() {
   if (_work != nullptr) {
     napi_delete_async_work(_env, _work);
     _work = nullptr;
   }
-}
+}*/
 
 inline void AsyncWorker::Destroy() {
   delete this;
